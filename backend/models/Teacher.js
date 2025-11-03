@@ -14,6 +14,7 @@ const TeacherSchema = new mongoose.Schema({
   phone: String,
   lastLogin: Date,
   isActive: { type: Boolean, default: true },
+  isApproved: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
