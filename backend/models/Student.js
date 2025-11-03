@@ -44,6 +44,7 @@ const StudentSchema = new mongoose.Schema({
   atRisk: { type: Boolean, default: false },
   lastLogin: Date,
   isActive: { type: Boolean, default: true },
+  isApproved: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
