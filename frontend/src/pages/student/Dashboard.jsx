@@ -1,19 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { Card, CardContent } from '@/components/ui/card';
-
-function Overview() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900" data-testid="student-dashboard-title">Student Dashboard</h1>
-      <Card>
-        <CardContent className="p-6">
-          <p>Welcome to your student dashboard. Your profile and data will appear here.</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+import Overview from './Overview';
+import Profile from './Profile';
+import Attendance from './Attendance';
+import Results from './Results';
+import Achievements from './Achievements';
+import Remarks from './Remarks';
 
 export default function StudentDashboard({ user, onLogout }) {
   const menuItems = [
@@ -28,7 +20,12 @@ export default function StudentDashboard({ user, onLogout }) {
   return (
     <Layout user={user} onLogout={onLogout} menuItems={menuItems}>
       <Routes>
-        <Route index element={<Overview />} />
+        <Route index element={<Overview user={user} />} />
+        <Route path="profile" element={<Profile user={user} />} />
+        <Route path="attendance" element={<Attendance user={user} />} />
+        <Route path="results" element={<Results user={user} />} />
+        <Route path="achievements" element={<Achievements user={user} />} />
+        <Route path="remarks" element={<Remarks user={user} />} />
       </Routes>
     </Layout>
   );
