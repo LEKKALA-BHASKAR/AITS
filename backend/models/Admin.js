@@ -10,6 +10,7 @@ const AdminSchema = new mongoose.Schema({
   imageURL: { type: String, default: '' },
   lastLogin: Date,
   isActive: { type: Boolean, default: true },
+  isApproved: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
