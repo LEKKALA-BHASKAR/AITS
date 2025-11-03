@@ -1,23 +1,15 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { Card, CardContent } from '@/components/ui/card';
-
-function Overview() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900" data-testid="admin-dashboard-title">Admin Dashboard</h1>
-      <Card>
-        <CardContent className="p-6">
-          <p>Welcome to the admin dashboard. System statistics and management options will appear here.</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+import Overview from './Overview';
+import ManageStudents from './ManageStudents';
+import ManageTeachers from './ManageTeachers';
+import ManageDepartments from './ManageDepartments';
+import Approvals from './Approvals';
 
 export default function AdminDashboard({ user, onLogout }) {
   const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: 'LayoutDashboard' },
+    { name: 'Approvals', path: '/admin/approvals', icon: 'User' },
     { name: 'Students', path: '/admin/students', icon: 'GraduationCap' },
     { name: 'Teachers', path: '/admin/teachers', icon: 'Users' },
     { name: 'Departments', path: '/admin/departments', icon: 'Building' },
@@ -26,7 +18,11 @@ export default function AdminDashboard({ user, onLogout }) {
   return (
     <Layout user={user} onLogout={onLogout} menuItems={menuItems}>
       <Routes>
-        <Route index element={<Overview />} />
+        <Route index element={<Overview user={user} />} />
+        <Route path="approvals" element={<Approvals />} />
+        <Route path="students" element={<ManageStudents />} />
+        <Route path="teachers" element={<ManageTeachers />} />
+        <Route path="departments" element={<ManageDepartments />} />
       </Routes>
     </Layout>
   );
