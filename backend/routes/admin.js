@@ -139,4 +139,38 @@ router.post('/notifications', auth, roleCheck(['admin']), async (req, res) => {
   }
 });
 
+router.get('/pending-approvals', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    const pendingStudents = await Student.find({ isApproved: false }).select('-password');
+    const pendingTeachers = await Teacher.find({ isApproved: false }).select('-password');
+    const pendingAdmins = await Admin.find({ isApproved: false }).select('-password');
+    
+    res.json({
+      students: pendingStudents,
+      teachers: pendingTeachers,
+      admins: pendingAdmins
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/approve-user/:role/:id', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    const { role, id } = req.params;
+    const { isApproved } = req.body;
+    
+    let Model;
+    if (role === 'student') Model = Student;
+    else if (role === 'teacher') Model = Teacher;
+    else if (role === 'admin') Model = Admin;
+    else return res.status(400).json({ error: 'Invalid role' });
+    
+    await Model.findByIdAndUpdate(id, { isApproved });
+    res.json({ message: `User ${isApproved ? 'approved' : 'rejected'} successfully` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
