@@ -28,6 +28,10 @@ router.post('/login', async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    if (!user.isApproved) {
+      return res.status(403).json({ error: 'Your account is pending admin approval' });
+    }
     
     const isMatch = await bcrypt.compare(password, user.password);
     
