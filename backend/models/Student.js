@@ -8,6 +8,7 @@ const StudentSchema = new mongoose.Schema({
   departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department', required: true },
   sectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Section', required: true },
   imageURL: { type: String, default: '' },
+  cloudinaryPublicId: { type: String },
   phone: { type: String },
   guardianName: { type: String },
   guardianPhone: { type: String },

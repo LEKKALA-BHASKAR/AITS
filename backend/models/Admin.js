@@ -8,6 +8,7 @@ const AdminSchema = new mongoose.Schema({
   departmentAccess: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Department' }],
   role: { type: String, enum: ['super_admin', 'department_admin'], default: 'department_admin' },
   imageURL: { type: String, default: '' },
+  cloudinaryPublicId: { type: String },
   lastLogin: Date,
   isActive: { type: Boolean, default: true },
   isApproved: { type: Boolean, default: false },
