@@ -3,6 +3,8 @@ const router = express.Router();
 const { auth, roleCheck } = require('../middleware/auth');
 const Student = require('../models/Student');
 const Notification = require('../models/Notification');
+const { upload, uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
+const { uploadLimiter } = require('../middleware/rateLimiter');
 
 router.get('/profile', auth, roleCheck(['student']), async (req, res) => {
   try {
@@ -77,6 +79,64 @@ router.get('/notifications', auth, roleCheck(['student']), async (req, res) => {
       ]
     }).sort({ date: -1 }).limit(50);
     res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Upload profile image
+router.post('/upload-image', auth, roleCheck(['student']), uploadLimiter, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file uploaded' });
+    }
+    
+    const student = await Student.findById(req.user.id);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    
+    // Delete old image from Cloudinary if exists
+    if (student.imageURL && student.cloudinaryPublicId) {
+      await deleteFromCloudinary(student.cloudinaryPublicId);
+    }
+    
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      'students',
+      `student_${req.user.id}_${Date.now()}`
+    );
+    
+    student.imageURL = result.secure_url;
+    student.cloudinaryPublicId = result.public_id;
+    await student.save();
+    
+    res.json({ message: 'Image uploaded successfully', imageURL: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get attendance statistics
+router.get('/attendance/stats', auth, roleCheck(['student']), async (req, res) => {
+  try {
+    const student = await Student.findById(req.user.id).select('attendance');
+    
+    const totalClasses = student.attendance.length;
+    const presentCount = student.attendance.filter(a => a.status === 'present').length;
+    const absentCount = student.attendance.filter(a => a.status === 'absent').length;
+    const lateCount = student.attendance.filter(a => a.status === 'late').length;
+    const attendancePercentage = totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(2) : 0;
+    
+    res.json({
+      totalClasses,
+      presentCount,
+      absentCount,
+      lateCount,
+      attendancePercentage,
+      lowAttendanceWarning: attendancePercentage < 65
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

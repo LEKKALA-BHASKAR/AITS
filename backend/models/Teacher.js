@@ -7,6 +7,7 @@ const TeacherSchema = new mongoose.Schema({
   password: { type: String, required: true },
   departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Department', required: true },
   imageURL: { type: String, default: '' },
+  cloudinaryPublicId: { type: String },
   subjects: [String],
   assignedSections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Section' }],
   experience: { type: Number, default: 0 },

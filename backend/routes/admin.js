@@ -4,6 +4,8 @@ const { auth, roleCheck } = require('../middleware/auth');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const json2csv = require('json2csv').parse;
+const { upload, uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
+const { uploadLimiter } = require('../middleware/rateLimiter');
 
 const Admin = require('../models/Admin');
 const Student = require('../models/Student');
@@ -307,6 +309,205 @@ router.put('/approve-all/:role', auth, roleCheck(['admin']), async (req, res) =>
 
     await Model.updateMany({ isApproved: false }, { isApproved: true });
     res.json({ message: `${role}s approved successfully` });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ---------------- IMAGE UPLOAD ROUTES ----------------
+
+// Upload student profile image
+router.post('/students/:id/upload-image', auth, roleCheck(['admin']), uploadLimiter, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file uploaded' });
+    }
+    
+    const student = await Student.findById(req.params.id);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    
+    // Delete old image from Cloudinary if exists
+    if (student.imageURL && student.cloudinaryPublicId) {
+      await deleteFromCloudinary(student.cloudinaryPublicId);
+    }
+    
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      'students',
+      `student_${req.params.id}_${Date.now()}`
+    );
+    
+    student.imageURL = result.secure_url;
+    student.cloudinaryPublicId = result.public_id;
+    await student.save();
+    
+    res.json({ message: 'Image uploaded successfully', imageURL: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Upload teacher profile image
+router.post('/teachers/:id/upload-image', auth, roleCheck(['admin']), uploadLimiter, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file uploaded' });
+    }
+    
+    const teacher = await Teacher.findById(req.params.id);
+    if (!teacher) {
+      return res.status(404).json({ error: 'Teacher not found' });
+    }
+    
+    // Delete old image from Cloudinary if exists
+    if (teacher.imageURL && teacher.cloudinaryPublicId) {
+      await deleteFromCloudinary(teacher.cloudinaryPublicId);
+    }
+    
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      'teachers',
+      `teacher_${req.params.id}_${Date.now()}`
+    );
+    
+    teacher.imageURL = result.secure_url;
+    teacher.cloudinaryPublicId = result.public_id;
+    await teacher.save();
+    
+    res.json({ message: 'Image uploaded successfully', imageURL: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ---------------- ANALYTICS ROUTES ----------------
+
+// Get comprehensive analytics
+router.get('/analytics', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    // Department-wise student count
+    const departmentStats = await Student.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: '$departmentId', count: { $sum: 1 } } },
+      { $lookup: { from: 'departments', localField: '_id', foreignField: '_id', as: 'department' } },
+      { $unwind: '$department' },
+      { $project: { departmentName: '$department.name', count: 1 } }
+    ]);
+    
+    // At-risk students by department
+    const riskStats = await Student.aggregate([
+      { $match: { atRisk: true, isActive: true } },
+      { $group: { _id: '$departmentId', count: { $sum: 1 } } },
+      { $lookup: { from: 'departments', localField: '_id', foreignField: '_id', as: 'department' } },
+      { $unwind: '$department' },
+      { $project: { departmentName: '$department.name', count: 1 } }
+    ]);
+    
+    // Attendance analytics (students with low attendance)
+    const lowAttendanceStudents = await Student.find({ isActive: true }).then(students => {
+      return students.filter(s => {
+        if (s.attendance.length === 0) return false;
+        const presentCount = s.attendance.filter(a => a.status === 'present').length;
+        const attendancePercentage = (presentCount / s.attendance.length) * 100;
+        return attendancePercentage < 65;
+      }).length;
+    });
+    
+    // Backlog statistics
+    const backlogStats = await Student.aggregate([
+      { $match: { isActive: true } },
+      { $group: { 
+        _id: null, 
+        totalWithBacklogs: { $sum: { $cond: [{ $gt: ['$backlogCount', 0] }, 1, 0] } },
+        avgBacklogs: { $avg: '$backlogCount' }
+      }}
+    ]);
+    
+    // Top performing students (by average marks)
+    const topStudents = await Student.find({ isActive: true }).then(students => {
+      return students
+        .filter(s => s.results.length > 0)
+        .map(s => ({
+          _id: s._id,
+          name: s.name,
+          rollNumber: s.rollNumber,
+          avgMarks: s.results.reduce((sum, r) => sum + r.marks, 0) / s.results.length
+        }))
+        .sort((a, b) => b.avgMarks - a.avgMarks)
+        .slice(0, 10);
+    });
+    
+    // Login activity (last 30 days)
+    const LoginLog = require('../models/LoginLog');
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const loginActivity = await LoginLog.aggregate([
+      { $match: { timestamp: { $gte: thirtyDaysAgo } } },
+      { $group: {
+        _id: { 
+          date: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          userModel: '$userModel'
+        },
+        count: { $sum: 1 }
+      }},
+      { $sort: { '_id.date': 1 } }
+    ]);
+    
+    res.json({
+      departmentStats,
+      riskStats,
+      lowAttendanceStudents,
+      backlogStats: backlogStats[0] || { totalWithBacklogs: 0, avgBacklogs: 0 },
+      topStudents,
+      loginActivity
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get login logs (admin only)
+router.get('/login-logs', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    const { role, status, limit = 100 } = req.query;
+    const LoginLog = require('../models/LoginLog');
+    
+    const query = {};
+    if (role) query.userModel = role.charAt(0).toUpperCase() + role.slice(1);
+    if (status) query.status = status;
+    
+    const logs = await LoginLog.find(query)
+      .sort({ timestamp: -1 })
+      .limit(parseInt(limit));
+    
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ---------------- RISK DETECTION ROUTES ----------------
+
+// Manually trigger risk detection update
+router.post('/update-risk-status', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    const { updateStudentRiskStatus } = require('../utils/riskDetection');
+    const result = await updateStudentRiskStatus();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get detailed at-risk students with reasons
+router.get('/at-risk-students', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    const { getAtRiskStudentsWithReasons } = require('../utils/riskDetection');
+    const students = await getAtRiskStudentsWithReasons();
+    res.json(students);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
