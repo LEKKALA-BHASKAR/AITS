@@ -489,4 +489,28 @@ router.get('/login-logs', auth, roleCheck(['admin']), async (req, res) => {
   }
 });
 
+// ---------------- RISK DETECTION ROUTES ----------------
+
+// Manually trigger risk detection update
+router.post('/update-risk-status', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    const { updateStudentRiskStatus } = require('../utils/riskDetection');
+    const result = await updateStudentRiskStatus();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get detailed at-risk students with reasons
+router.get('/at-risk-students', auth, roleCheck(['admin']), async (req, res) => {
+  try {
+    const { getAtRiskStudentsWithReasons } = require('../utils/riskDetection');
+    const students = await getAtRiskStudentsWithReasons();
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

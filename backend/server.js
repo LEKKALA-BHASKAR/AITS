@@ -62,9 +62,20 @@ app.get('/api', (req, res) => {
   res.json({ message: 'AITS CSMS API Server Running' });
 });
 
+// Error handling middleware (must be after all routes)
+const { errorHandler, notFound } = require('./middleware/errorHandler');
+app.use(notFound);
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 8001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+  
+  // Initialize scheduled tasks
+  if (process.env.NODE_ENV !== 'test') {
+    const { initScheduledTasks } = require('./utils/scheduler');
+    initScheduledTasks();
+  }
 });
 
 module.exports = app;
