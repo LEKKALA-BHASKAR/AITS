@@ -158,7 +158,7 @@ router.delete('/:remarkId/student/:studentId', auth, roleCheck(['admin', 'teache
       return res.status(403).json({ error: 'You can only delete your own remarks' });
     }
 
-    remarkDoc.deleteOne();
+    student.remarks.pull(req.params.remarkId);
     await student.save();
 
     res.json({ message: 'Remark deleted successfully' });

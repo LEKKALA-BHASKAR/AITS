@@ -78,6 +78,15 @@ router.post('/', auth, roleCheck(['admin']), async (req, res) => {
       return res.status(400).json({ error: 'Title, message, and target audience are required' });
     }
 
+    // Validate targetAudience-specific requirements
+    if (targetAudience === 'department' && !departmentId) {
+      return res.status(400).json({ error: 'Department ID is required when target audience is department' });
+    }
+
+    if (targetAudience === 'section' && !sectionId) {
+      return res.status(400).json({ error: 'Section ID is required when target audience is section' });
+    }
+
     const notification = new Notification({
       title,
       message,
@@ -174,7 +183,8 @@ router.get('/unread/count', auth, async (req, res) => {
         ]
       };
     } else if (role === 'admin') {
-      query = { targetAudience: 'all' };
+      // Admins see all notifications
+      query = {};
     }
 
     // Count notifications from the last 7 days

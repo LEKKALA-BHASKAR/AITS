@@ -199,7 +199,7 @@ router.get('/login/activity', auth, roleCheck(['admin']), async (req, res) => {
   try {
     const days = parseInt(req.query.days) || 7;
     const startDate = new Date();
-    startDate.setDate(startDate.setDate() - days);
+    startDate.setDate(startDate.getDate() - days);
     
     const logs = await LoginLog.find({
       timestamp: { $gte: startDate }
