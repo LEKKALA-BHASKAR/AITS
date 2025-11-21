@@ -1,8 +1,25 @@
 # AITS Centralized Student Management System (CSMS)
 
-A comprehensive, enterprise-grade student management system built with the MERN stack (MongoDB, Express.js, React, Node.js) featuring role-based access control, advanced analytics, and cloud storage integration.
+A comprehensive, enterprise-grade student management system built with the MERN stack (MongoDB, Express.js, React, Node.js) featuring role-based access control, advanced analytics, cloud storage integration, and real-time notifications.
 
-## 🌟 Features
+## 🌟 Recent Updates (v2.0.0)
+
+### New Backend Features
+- ✅ **Notifications API** - Targeted announcements with role-based filtering
+- ✅ **Remarks API** - Enhanced student remark management with statistics
+- ✅ **Analytics API** - 8 comprehensive endpoints for data visualization
+- ✅ **Security** - CodeQL scan passed with 0 vulnerabilities
+
+### New Frontend Features
+- ✅ **FileUpload Component** - Reusable Cloudinary integration
+- ✅ **DataTable Component** - Advanced table with search, filter, and export
+- ✅ **Charts Library** - 6 interactive chart components using Recharts
+- ✅ **Admin Pages** - Department/Section management, Notification creator, Analytics dashboard
+- ✅ **Student Pages** - Notifications center, Support tickets system
+
+See [NEW_FEATURES.md](./NEW_FEATURES.md) for detailed documentation.
+
+## 🌟 Core Features
 
 ### Core Functionality
 - **Multi-Role Authentication**: Separate dashboards for Admin, Teacher, and Student roles

@@ -47,6 +47,9 @@ const departmentRoutes = require('./routes/department');
 const sectionRoutes = require('./routes/section');
 const certificateRoutes = require('./routes/certificate');
 const supportTicketRoutes = require('./routes/supportTicket');
+const notificationRoutes = require('./routes/notification');
+const remarkRoutes = require('./routes/remark');
+const analyticsRoutes = require('./routes/analytics');
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -57,6 +60,9 @@ app.use('/api/department', departmentRoutes);
 app.use('/api/section', sectionRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/remarks', remarkRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.get('/api', (req, res) => {
   res.json({ message: 'AITS CSMS API Server Running' });
