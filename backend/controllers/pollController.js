@@ -4,6 +4,10 @@ module.exports = {
   async createPoll(req, res) {
     try {
       const poll = await Poll.create(req.body);
+      // Emit real-time update event via Socket.IO
+      if (req.app && req.app.get && req.app.get('io')) {
+        req.app.get('io').emit('pollUpdated', poll);
+      }
       res.status(201).json(poll);
     } catch (err) {
       res.status(400).json({ error: err.message });

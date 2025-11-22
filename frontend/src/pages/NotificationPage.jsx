@@ -9,8 +9,19 @@ const initialNotifications = [
 ];
 
 const NotificationPage = () => {
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const [form, setForm] = useState({ message: '' });
+  const [notifications, setNotifications] = useState([]);
+  const [form, setForm] = useState({ title: '', message: '' });
+
+  // Fetch notifications from backend on mount
+  useEffect(() => {
+    fetch('http://localhost:8001/api/notifications')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setNotifications(data.map(n => ({ message: n.title + ': ' + n.message, status: 'unread' })));
+        }
+      });
+  }, []);
 
   // Socket.IO client setup
   useEffect(() => {
@@ -28,10 +39,15 @@ const NotificationPage = () => {
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setNotifications([...notifications, { ...form, status: 'unread' }]);
-    setForm({ message: '' });
+    // Send notification to backend
+    await fetch('http://localhost:8001/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: form.title || 'Notification', message: form.message, targetAudience: 'all' })
+    });
+    setForm({ title: '', message: '' });
   };
 
   return (
@@ -39,6 +55,7 @@ const NotificationPage = () => {
       <h1 className="text-2xl font-bold">Notification Module</h1>
       <ModuleList title="Notifications" items={notifications.map(n => `${n.message} - ${n.status}`)} />
       <form className="my-4" onSubmit={handleSubmit}>
+        <input name="title" value={form.title} onChange={handleChange} placeholder="Title" required className="border p-2 mr-2" />
         <input name="message" value={form.message} onChange={handleChange} placeholder="Message" required className="border p-2 mr-2" />
         <button type="submit" className="bg-blue-500 text-white px-4 py-2">Send Notification</button>
       </form>

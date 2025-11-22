@@ -1,23 +1,48 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
+import io from 'socket.io-client';
 import ModuleList from '../components/ModuleList';
 
 const initialPolls = [
-	{ question: 'Best Programming Language?', options: ['Python', 'JavaScript'], status: 'open' },
-	{ question: 'Favorite Sport?', options: ['Cricket', 'Football'], status: 'closed' },
+	// ...existing code removed, will fetch from backend
 ];
 
 const PollPage = () => {
-	const [polls, setPolls] = useState(initialPolls);
+	const [polls, setPolls] = useState([]);
 	const [form, setForm] = useState({ question: '', options: '' });
+
+	// Socket.IO client setup
+	useEffect(() => {
+		// Fetch polls from backend
+		fetch('http://localhost:8001/api/polls')
+			.then(res => res.json())
+			.then(data => {
+				if (Array.isArray(data)) {
+					setPolls(data.map(p => ({ question: p.question, options: p.options.map(o => o.text || o), status: 'open' })));
+				}
+			});
+
+		const socket = io('http://localhost:8001');
+		socket.on('pollUpdated', poll => {
+			setPolls(prev => [
+				{ question: poll.question, options: poll.options.map(o => o.text || o), status: 'open' },
+				...prev
+			]);
+		});
+		return () => {
+			socket.disconnect();
+		};
+	}, []);
 
 	const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		setPolls([
-			...polls,
-			{ question: form.question, options: form.options.split(',').map((o) => o.trim()), status: 'open' },
-		]);
+		await fetch('http://localhost:8001/api/polls', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ question: form.question, options: form.options.split(',').map((o) => ({ text: o.trim(), votes: 0 })) })
+		});
 		setForm({ question: '', options: '' });
 	};
 
