@@ -285,25 +285,28 @@ export default function ManageStudents() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Loading students...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 animate-fadeIn">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Student Management</h1>
-          <p className="text-gray-600 mt-1">Manage all student records and information</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Student Management</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage all student records and information</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={exportCSV} className="flex items-center gap-2">
+          <Button variant="outline" onClick={exportCSV} className="flex items-center gap-2 hover:shadow-md transition-shadow">
             <Download className="h-4 w-4" />
             Export CSV
           </Button>
-          <Button onClick={() => setIsDialogOpen(true)} className="flex items-center gap-2">
+          <Button onClick={() => setIsDialogOpen(true)} className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all">
             <Plus className="h-4 w-4" />
             Add Student
           </Button>
@@ -311,17 +314,17 @@ export default function ManageStudents() {
       </div>
 
       {/* Search and Filter Section */}
-      <Card>
+      <Card className="border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-shadow">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <Filter className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             Search & Filters
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="search">Search by Name</Label>
+              <Label htmlFor="search" className="dark:text-gray-300">Search by Name</Label>
               <div className="flex gap-2">
                 <Input
                   id="search"
@@ -329,21 +332,21 @@ export default function ManageStudents() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="flex-1"
+                  className="flex-1 dark:bg-gray-800 dark:border-gray-700"
                 />
-                <Button onClick={handleSearch} size="icon">
+                <Button onClick={handleSearch} size="icon" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
+              <Label htmlFor="department" className="dark:text-gray-300">Department</Label>
               <Select 
                 value={filters.departmentId} 
                 onValueChange={(value) => setFilters({...filters, departmentId: value})}
               >
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-gray-800 dark:border-gray-700">
                   <SelectValue placeholder="All departments" />
                 </SelectTrigger>
                 <SelectContent>
@@ -358,12 +361,12 @@ export default function ManageStudents() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="risk-status">Risk Status</Label>
+              <Label htmlFor="risk-status" className="dark:text-gray-300">Risk Status</Label>
               <Select 
                 value={filters.atRisk} 
                 onValueChange={(value) => setFilters({...filters, atRisk: value})}
               >
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-gray-800 dark:border-gray-700">
                   <SelectValue placeholder="All status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -375,12 +378,12 @@ export default function ManageStudents() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="approval">Approval Status</Label>
+              <Label htmlFor="approval" className="dark:text-gray-300">Approval Status</Label>
               <Select 
                 value={filters.isApproved} 
                 onValueChange={(value) => setFilters({...filters, isApproved: value})}
               >
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-gray-800 dark:border-gray-700">
                   <SelectValue placeholder="All status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -393,10 +396,10 @@ export default function ManageStudents() {
           </div>
           
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={handleResetFilters}>
+            <Button variant="outline" onClick={handleResetFilters} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               Reset Filters
             </Button>
-            <Button onClick={handleSearch}>
+            <Button onClick={handleSearch} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
               Apply Filters
             </Button>
           </div>
@@ -404,52 +407,52 @@ export default function ManageStudents() {
       </Card>
 
       {/* Students Table */}
-      <Card>
+      <Card className="border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Students ({students.length})</CardTitle>
-          <Badge variant="secondary" className="text-sm">
+          <CardTitle className="text-gray-900 dark:text-gray-100">Students ({students.length})</CardTitle>
+          <Badge variant="secondary" className="text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
             Total: {students.length}
           </Badge>
         </CardHeader>
         <CardContent>
           {students.length > 0 ? (
-            <div className="rounded-md border">
+            <div className="rounded-md border border-gray-200 dark:border-gray-800 overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Student Info</TableHead>
-                    <TableHead>Academic</TableHead>
-                    <TableHead>Attendance</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                  <TableRow className="bg-gray-50 dark:bg-gray-900/50">
+                    <TableHead className="dark:text-gray-300">Student Info</TableHead>
+                    <TableHead className="dark:text-gray-300">Academic</TableHead>
+                    <TableHead className="dark:text-gray-300">Attendance</TableHead>
+                    <TableHead className="dark:text-gray-300">Status</TableHead>
+                    <TableHead className="text-right dark:text-gray-300">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {students.map((student) => {
                     const attendancePercentage = calculateAttendance(student.attendance);
                     return (
-                      <TableRow key={student._id} className="hover:bg-gray-50/50">
+                      <TableRow key={student._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-semibold text-gray-900">{student.name}</span>
-                            <span className="text-sm text-gray-600">{student.email}</span>
-                            <span className="text-xs text-gray-500">Roll: {student.rollNumber}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{student.name}</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{student.email}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-500">Roll: {student.rollNumber}</span>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="text-sm">{student.departmentId?.name}</span>
-                            <span className="text-xs text-gray-500">Section: {student.sectionId?.name || 'N/A'}</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100">{student.departmentId?.name}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-500">Section: {student.sectionId?.name || 'N/A'}</span>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className={`font-semibold ${
-                            attendancePercentage >= 75 ? 'text-green-600' : 
-                            attendancePercentage >= 60 ? 'text-yellow-600' : 'text-red-600'
+                            attendancePercentage >= 75 ? 'text-green-600 dark:text-green-400' : 
+                            attendancePercentage >= 60 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
                           }`}>
                             {attendancePercentage}%
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 dark:text-gray-500">
                             {student.attendance?.length || 0} records
                           </div>
                         </TableCell>
@@ -475,7 +478,7 @@ export default function ManageStudents() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" className="hover:bg-gray-100 dark:hover:bg-gray-800">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -505,7 +508,7 @@ export default function ManageStudents() {
                                 Toggle Risk
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                className="text-red-600"
+                                className="text-red-600 dark:text-red-400"
                                 onClick={() => deactivateStudent(student._id)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -522,12 +525,12 @@ export default function ManageStudents() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
+              <div className="text-gray-400 dark:text-gray-600 mb-4">
                 <UserX className="h-12 w-12 mx-auto" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No students found</h3>
-              <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
-              <Button onClick={handleResetFilters}>Reset Filters</Button>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No students found</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">Try adjusting your search or filters</p>
+              <Button onClick={handleResetFilters} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">Reset Filters</Button>
             </div>
           )}
         </CardContent>

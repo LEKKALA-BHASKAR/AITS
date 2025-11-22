@@ -5,6 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, GraduationCap } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -84,21 +87,37 @@ export default function Login({ setUser }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 p-4 transition-colors duration-300">
+      <div className="absolute top-4 left-4">
+        <Link to="/">
+          <Button variant="ghost" className="gap-2 hover:bg-white/50 dark:hover:bg-gray-800/50">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Button>
+        </Link>
+      </div>
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="w-full max-w-md animate-scaleIn">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-blue-100 dark:border-gray-800 p-8 transition-colors duration-300">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-[#1E3A8A] mb-2" data-testid="login-title">AITS CSMS</h1>
-            <p className="text-gray-600">Centralized Student Management System</p>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-500 p-2 rounded-xl shadow-lg">
+                <GraduationCap className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent" data-testid="login-title">AITS CSMS</h1>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">Centralized Student Management System</p>
           </div>
 
           <form onSubmit={isSignup ? handleSignup : handleLogin} className="space-y-6">
             <div>
-              <Label htmlFor="role" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="role" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {isSignup ? 'Register As' : 'Login As'}
               </Label>
               <Select value={role} onValueChange={setRole}>
-                <SelectTrigger data-testid="role-select">
+                <SelectTrigger data-testid="role-select" className="mt-1 dark:bg-gray-800 dark:border-gray-700">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -111,7 +130,7 @@ export default function Login({ setUser }) {
 
             {isSignup && (
               <div>
-                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Full Name</Label>
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</Label>
                 <Input
                   id="name"
                   type="text"
@@ -119,14 +138,14 @@ export default function Login({ setUser }) {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your full name"
                   required
-                  className="mt-1"
+                  className="mt-1 dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
             )}
 
             {isSignup && role === 'student' && (
               <div>
-                <Label htmlFor="rollNumber" className="text-sm font-medium text-gray-700">Roll Number</Label>
+                <Label htmlFor="rollNumber" className="text-sm font-medium text-gray-700 dark:text-gray-300">Roll Number</Label>
                 <Input
                   id="rollNumber"
                   type="text"
@@ -134,14 +153,14 @@ export default function Login({ setUser }) {
                   onChange={(e) => setRollNumber(e.target.value)}
                   placeholder="Enter roll number"
                   required
-                  className="mt-1"
+                  className="mt-1 dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
             )}
 
             {isSignup && role === 'teacher' && (
               <div>
-                <Label htmlFor="teacherId" className="text-sm font-medium text-gray-700">Teacher ID</Label>
+                <Label htmlFor="teacherId" className="text-sm font-medium text-gray-700 dark:text-gray-300">Teacher ID</Label>
                 <Input
                   id="teacherId"
                   type="text"
@@ -149,14 +168,14 @@ export default function Login({ setUser }) {
                   onChange={(e) => setTeacherId(e.target.value)}
                   placeholder="Enter teacher ID"
                   required
-                  className="mt-1"
+                  className="mt-1 dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
             )}
 
             {isSignup && role === 'admin' && (
               <div>
-                <Label htmlFor="adminId" className="text-sm font-medium text-gray-700">Admin ID</Label>
+                <Label htmlFor="adminId" className="text-sm font-medium text-gray-700 dark:text-gray-300">Admin ID</Label>
                 <Input
                   id="adminId"
                   type="text"
@@ -164,13 +183,13 @@ export default function Login({ setUser }) {
                   onChange={(e) => setAdminId(e.target.value)}
                   placeholder="Enter admin ID"
                   required
-                  className="mt-1"
+                  className="mt-1 dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
             )}
 
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -179,12 +198,12 @@ export default function Login({ setUser }) {
                 placeholder="Enter your email"
                 required
                 data-testid="email-input"
-                className="mt-1"
+                className="mt-1 dark:bg-gray-800 dark:border-gray-700"
               />
             </div>
 
             <div>
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -193,14 +212,14 @@ export default function Login({ setUser }) {
                 placeholder="Enter your password"
                 required
                 data-testid="password-input"
-                className="mt-1"
+                className="mt-1 dark:bg-gray-800 dark:border-gray-700"
               />
             </div>
 
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#1E3A8A] hover:bg-[#2563EB] text-white py-6 rounded-lg font-semibold"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-500 text-white py-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               data-testid="login-button"
             >
               {loading ? (isSignup ? 'Registering...' : 'Logging in...') : (isSignup ? 'Register' : 'Login')}
@@ -210,7 +229,7 @@ export default function Login({ setUser }) {
               <button
                 type="button"
                 onClick={() => setIsSignup(!isSignup)}
-                className="text-[#2563EB] hover:underline text-sm"
+                className="text-blue-600 dark:text-blue-400 hover:underline text-sm transition-colors"
               >
                 {isSignup ? 'Already have an account? Login' : "Don't have an account? Register"}
               </button>
