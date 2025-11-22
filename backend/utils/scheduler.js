@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const { updateStudentRiskStatus } = require('../utils/riskDetection');
 const { autoGenerateAllReports } = require('../utils/monthlyReportGenerator');
+const { sendWeeklyAttendanceAlerts, checkUnmarkedAttendance } = require('../utils/attendanceNotifications');
 const Attendance = require('../models/Attendance');
 const AuditLog = require('../models/AuditLog');
 const fs = require('fs').promises;
@@ -99,10 +100,32 @@ function initScheduledTasks() {
     }
   });
   
+  // Send weekly attendance alerts every Monday at 8 AM
+  cron.schedule('0 8 * * MON', async () => {
+    console.log('Running weekly attendance alerts...');
+    try {
+      const alertsSent = await sendWeeklyAttendanceAlerts();
+      console.log(`Weekly alerts completed: ${alertsSent} students notified`);
+    } catch (error) {
+      console.error('Weekly attendance alerts failed:', error.message);
+    }
+  });
+  
+  // Check unmarked attendance every 30 minutes during class hours (8 AM - 6 PM)
+  cron.schedule('*/30 8-18 * * MON-SAT', async () => {
+    try {
+      await checkUnmarkedAttendance();
+    } catch (error) {
+      console.error('Unmarked attendance check failed:', error.message);
+    }
+  });
+  
   console.log('Scheduled tasks initialized');
   console.log('- Risk detection: Daily at 2:00 AM');
   console.log('- Monthly reports: 1st of each month at 2:00 AM');
   console.log('- Attendance locking: Every hour');
+  console.log('- Weekly attendance alerts: Every Monday at 8:00 AM');
+  console.log('- Unmarked attendance check: Every 30 minutes (8 AM - 6 PM, Mon-Sat)');
 }
 
 module.exports = { initScheduledTasks };
