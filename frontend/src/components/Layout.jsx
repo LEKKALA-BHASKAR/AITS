@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '../components/ui/button';
 import { LayoutDashboard, User, Users, GraduationCap, Calendar, FileText, Award, MessageSquare, Building, LogOut, Menu, X, Bell, Settings, BarChart } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { Badge } from '@/components/ui/badge';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { Badge } from '../components/ui/badge';
 
 const iconMap = {
   LayoutDashboard,

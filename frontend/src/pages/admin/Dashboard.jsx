@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import Layout from '@/components/Layout';
+import Layout from '../../components/Layout';
 import Overview from './Overview';
 import ManageStudents from './ManageStudents';
 import ManageTeachers from './ManageTeachers';

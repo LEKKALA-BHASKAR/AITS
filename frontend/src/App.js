@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import '@/App.css';
-import LandingPage from '@/pages/LandingPage';
-import Login from '@/pages/Login';
-import StudentDashboard from '@/pages/student/Dashboard';
-import TeacherDashboard from '@/pages/teacher/Dashboard';
-import AdminDashboard from '@/pages/admin/Dashboard';
+import './App.css';
+import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
+import StudentDashboard from './pages/student/Dashboard';
+import TeacherDashboard from './pages/teacher/Dashboard';
+import AdminDashboard from './pages/admin/Dashboard';
 import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeProvider } from './components/ThemeProvider';
 
 function App() {
   const [user, setUser] = useState(null);

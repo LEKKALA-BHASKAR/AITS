@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, GraduationCap } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
