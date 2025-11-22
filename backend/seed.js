@@ -10,20 +10,210 @@ const Section = require('./models/Section');
 const Notification = require('./models/Notification');
 
 async function seedDatabase() {
+      // --- BEGIN NEW MOCK DATA GENERATION ---
+      const faker = require('faker');
+      const Certificate = require('./models/Certificate');
+      const Remark = require('./models/Remark');
+      const Timetable = require('./models/Timetable');
+      const Attendance = require('./models/Attendance');
+      const Achievement = require('./models/Achievement');
+      const IDCard = require('./models/IDCard');
+      const Fee = require('./models/Fee');
+      const HallTicket = require('./models/HallTicket');
+      const Mentoring = require('./models/Mentoring');
+      const Skill = require('./models/Skill');
+
+      // Helper arrays
+      const deptNames = [
+        'Mechanical Engineering', 'Civil Engineering', 'Information Technology', 'Chemical Engineering',
+        'Biotechnology', 'Aerospace Engineering', 'Automobile Engineering', 'Mining Engineering',
+        'Metallurgical Engineering', 'Environmental Engineering'
+      ];
+      const sectionSuffixes = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
+
+      // 1. Create 10 new departments with HODs
+      let newDepartments = [];
+      let newTeachers = [];
+      for (let i = 0; i < 10; i++) {
+        const dept = await Department.create({
+          name: deptNames[i],
+          code: deptNames[i].split(' ')[0].toUpperCase(),
+          isActive: true
+        });
+        // Create HOD
+        const hodPass = await bcrypt.hash('hod123', 10);
+        const hod = await Teacher.create({
+          name: faker.name.findName(),
+          teacherId: `HOD${i+1}`,
+          email: `hod${i+1}@aits.edu`,
+          password: hodPass,
+          departmentId: dept._id,
+          subjects: [faker.name.jobArea()],
+          experience: faker.datatype.number({min:10,max:25}),
+          designation: 'HOD',
+          phone: faker.phone.phoneNumber(),
+          isApproved: true,
+          isActive: true
+        });
+        dept.hodId = hod._id;
+        await dept.save();
+        newDepartments.push(dept);
+        newTeachers.push(hod);
+      }
+
+      // 2. Create 20 new sections distributed across departments
+      let newSections = [];
+      for (let i = 0; i < 20; i++) {
+        const dept = newDepartments[i % newDepartments.length];
+        const section = await Section.create({
+          name: `${dept.code}-${sectionSuffixes[i]}`,
+          departmentId: dept._id,
+          isActive: true
+        });
+        dept.sections.push(section._id);
+        await dept.save();
+        newSections.push(section);
+      }
+
+      // 3. Create 50 new students distributed across sections
+      let newStudents = [];
+      const studentPass = await bcrypt.hash('student123', 10);
+      for (let i = 0; i < 50; i++) {
+        const section = newSections[i % newSections.length];
+        const dept = newDepartments[i % newDepartments.length];
+        const name = faker.name.findName();
+        const rollNumber = `25${dept.code}${String(i+1).padStart(3,'0')}`;
+        const email = `student${i+1}@aits.edu`;
+        const student = await Student.create({
+          name,
+          rollNumber,
+          email,
+          password: studentPass,
+          departmentId: dept._id,
+          sectionId: section._id,
+          phone: faker.phone.phoneNumber(),
+          guardianName: faker.name.findName(),
+          guardianPhone: faker.phone.phoneNumber(),
+          isApproved: true,
+          isActive: true
+        });
+        section.studentIds.push(student._id);
+        await section.save();
+        newStudents.push(student);
+      }
+
+      // 4. Add certificates, remarks, attendance, achievements, ID cards, hall tickets, fee, mentoring, skills, timetables
+      for (const student of newStudents) {
+        // Certificates
+        await Certificate.create({
+          student: student._id,
+          title: 'NPTEL Python',
+          url: faker.internet.url(),
+          type: 'nptel',
+          status: 'approved',
+          verifiedBy: newTeachers[0]._id
+        });
+        // Remarks
+        await Remark.create({
+          studentId: student._id,
+          createdBy: newTeachers[0]._id,
+          createdByModel: 'Teacher',
+          createdByName: newTeachers[0].name,
+          title: 'Good Performance',
+          description: 'Consistent and attentive in class.',
+          type: 'positive',
+          category: 'academic',
+          severity: 'low',
+          academicYear: '2025-2026',
+          semester: 1
+        });
+        // Attendance
+        await Attendance.create({
+          section: student.sectionId.toString(),
+          sectionId: student.sectionId,
+          subject: 'Mathematics',
+          teacher: newTeachers[0]._id,
+          date: new Date(),
+          day: 'MON',
+          time: '9-10',
+          startTime: '09:00',
+          endTime: '10:00',
+          students: [{ studentId: student._id, status: 'present' }],
+          markedBy: newTeachers[0]._id
+        });
+        // Achievements
+        await Achievement.create({
+          student: student._id,
+          title: 'Hackathon Winner',
+          description: 'Won 2nd place in inter-college hackathon.',
+          type: 'hackathon',
+          tags: ['coding','teamwork'],
+          certificateUrl: faker.internet.url(),
+          status: 'approved',
+          verifiedBy: newTeachers[0]._id
+        });
+        // ID Card
+        await IDCard.create({
+          student: student._id,
+          cardNumber: `ID${student.rollNumber}`,
+          issueDate: new Date(),
+          expiryDate: new Date(new Date().setFullYear(new Date().getFullYear()+4)),
+          status: 'Active',
+          photoUrl: faker.image.avatar()
+        });
+        // Hall Ticket
+        await HallTicket.create({
+          student: student._id,
+          examName: 'Mid Term 2025',
+          issueDate: new Date(),
+          status: 'Active'
+        });
+        // Fee
+        await Fee.create({
+          student: student._id,
+          amount: faker.datatype.number({min:20000,max:50000}),
+          dueDate: new Date(new Date().setMonth(new Date().getMonth()+1)),
+          status: 'Unpaid'
+        });
+        // Mentoring
+        await Mentoring.create({
+          mentor: newTeachers[0]._id,
+          mentee: student._id,
+          startDate: new Date(),
+          notes: 'Assigned for academic guidance.'
+        });
+        // Skills
+        const skill = await Skill.create({
+          name: faker.hacker.noun(),
+          description: faker.hacker.phrase(),
+          students: [student._id]
+        });
+        // Timetable
+        await Timetable.create({
+          section: student.sectionId.toString(),
+          sectionId: student.sectionId,
+          department: student.departmentId.toString(),
+          schedule: {
+            MON: [{ time: '9-10', startTime: '09:00', endTime: '10:00', subject: 'Mathematics', teacher: newTeachers[0]._id }],
+            TUE: [{ time: '10-11', startTime: '10:00', endTime: '11:00', subject: 'Physics', teacher: newTeachers[0]._id }],
+            WED: [{ time: '11-12', startTime: '11:00', endTime: '12:00', subject: 'Chemistry', teacher: newTeachers[0]._id }],
+            THU: [{ time: '12-1', startTime: '12:00', endTime: '13:00', subject: 'English', teacher: newTeachers[0]._id }],
+            FRI: [{ time: '1-2', startTime: '13:00', endTime: '14:00', subject: 'Computer Science', teacher: newTeachers[0]._id }],
+            SAT: [],
+            SUN: []
+          },
+          uploadedBy: null,
+          isActive: true
+        });
+      }
+      // --- END NEW MOCK DATA GENERATION ---
   try {
     await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URL, {
       dbName: process.env.DB_NAME || 'aits_csms'
     });
     console.log('Connected to MongoDB');
 
-    // Clear existing data
-    await Student.deleteMany({});
-    await Teacher.deleteMany({});
-    await Admin.deleteMany({});
-    await Department.deleteMany({});
-    await Section.deleteMany({});
-    await Notification.deleteMany({});
-    console.log('Cleared existing data');
+    // Do NOT clear existing data. We will append new mock data.
 
     // Create Departments
     const cse = await Department.create({
