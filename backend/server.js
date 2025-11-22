@@ -77,6 +77,8 @@ const leaveRoutes = require('./routes/leave');
 const feedbackRoutes = require('./routes/feedback');
 const idCardRoutes = require('./routes/idCard');
 const student360Routes = require('./routes/student360');
+const resultRoutes = require('./routes/result');
+const communityRoutes = require('./routes/community');
 // ...existing code...
 
 // API Routes
@@ -116,6 +118,8 @@ app.use('/api/leave', leaveRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/idcard', idCardRoutes);
 app.use('/api/student360', student360Routes);
+app.use('/api/results', resultRoutes);
+app.use('/api/community', communityRoutes);
 // ...existing code...
 
 app.get('/api', (req, res) => {
