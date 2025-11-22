@@ -114,6 +114,34 @@ async function generateMonthlyReport(sectionName, month, year, subject = null) {
       // Get attendance records for this subject
       const subjectRecords = attendanceRecords.filter(r => r.subject === subj);
       
+      // Bulk fetch all leave records for the month to avoid N+1 queries
+      const studentIds = students.map(s => s._id);
+      const leaveRecords = await Leave.find({
+        student: { $in: studentIds },
+        status: { $in: ['Approved', 'APPROVED'] },
+        $or: [
+          { startDate: { $lte: endDate }, endDate: { $gte: startDate } }
+        ]
+      });
+      
+      // Create a map for quick leave lookups
+      const leaveMap = new Map();
+      for (const leave of leaveRecords) {
+        const key = leave.student.toString();
+        if (!leaveMap.has(key)) {
+          leaveMap.set(key, []);
+        }
+        leaveMap.get(key).push(leave);
+      }
+      
+      // Helper function to check if student is on leave
+      const isStudentOnLeave = (studentId, date) => {
+        const leaves = leaveMap.get(studentId.toString()) || [];
+        return leaves.some(leave => 
+          date >= leave.startDate && date <= leave.endDate
+        );
+      };
+      
       // Calculate attendance for each student
       for (const student of students) {
         let totalClasses = 0;
@@ -131,9 +159,8 @@ async function generateMonthlyReport(sectionName, month, year, subject = null) {
               attended++;
             }
           } else {
-            // Check if student was on leave
-            const isOnLeave = await Leave.isOnLeave(student._id, record.date);
-            if (!isOnLeave) {
+            // Check if student was on leave (using pre-fetched map)
+            if (!isStudentOnLeave(student._id, record.date)) {
               totalClasses++;
               // Absent if not in record and not on leave
             }

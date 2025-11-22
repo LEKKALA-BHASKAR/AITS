@@ -7,6 +7,9 @@ const AuditLog = require('../models/AuditLog');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Configuration constants - can be overridden by environment variables
+const GRACE_PERIOD_MINUTES = parseInt(process.env.GRACE_PERIOD_MINUTES) || 15;
+
 /**
  * Schedule automated tasks
  */
@@ -59,7 +62,6 @@ function initScheduledTasks() {
   cron.schedule('0 * * * *', async () => {
     console.log('Running scheduled attendance locking...');
     try {
-      const GRACE_PERIOD_MINUTES = 15;
       const now = new Date();
       const graceExpiry = new Date(now.getTime() - GRACE_PERIOD_MINUTES * 60 * 1000);
       

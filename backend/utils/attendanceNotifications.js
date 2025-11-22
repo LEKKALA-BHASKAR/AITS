@@ -10,6 +10,10 @@ const Timetable = require('../models/Timetable');
  * Handles all attendance-related notifications and alerts
  */
 
+// Configuration constants
+const MIN_UNMARKED_THRESHOLD = 10; // Minutes after class end to start alerting
+const MAX_UNMARKED_THRESHOLD = 70; // Minutes after class end to stop alerting
+
 /**
  * Send notification to teacher at period start
  * @param {String} teacherId - Teacher ID
@@ -249,7 +253,7 @@ async function checkUnmarkedAttendance() {
         
         const minutesSinceEnd = (now - slotEnd) / (1000 * 60);
         
-        if (minutesSinceEnd >= 10 && minutesSinceEnd <= 70) {
+        if (minutesSinceEnd >= MIN_UNMARKED_THRESHOLD && minutesSinceEnd <= MAX_UNMARKED_THRESHOLD) {
           // Check if attendance was marked
           const exists = await Attendance.existsForSession(
             timetable.section,

@@ -6,6 +6,11 @@ const Leave = require('../models/Leave');
  * Provides detailed analytics, warnings, and improvement suggestions
  */
 
+// Constants for attendance thresholds
+const ATTENDANCE_THRESHOLD = 0.75; // 75% minimum attendance
+const ATTENDANCE_CRITICAL = 0.65;  // 65% critical threshold
+const IMPROVEMENT_FACTOR = 0.25;    // Factor for calculating classes needed
+
 /**
  * Get comprehensive attendance statistics for a student
  * @param {String} studentId - Student ID
@@ -144,11 +149,11 @@ async function getStudentAttendanceAnalytics(studentId) {
       
       stats.percentage = parseFloat(percentage);
       
-      // Calculate classes needed to reach 75%
-      const classesNeeded = Math.ceil((0.75 * stats.total - stats.attended) / 0.25);
+      // Calculate classes needed to reach threshold
+      const classesNeeded = Math.ceil((ATTENDANCE_THRESHOLD * stats.total - stats.attended) / IMPROVEMENT_FACTOR);
       
       // Subject-specific warnings
-      if (percentage < 65) {
+      if (percentage < ATTENDANCE_CRITICAL * 100) {
         warnings.push({
           type: 'CRITICAL',
           subject: subject,
@@ -161,17 +166,17 @@ async function getStudentAttendanceAnalytics(studentId) {
           message: `To improve ${subject} attendance: You need to attend approximately ${Math.max(classesNeeded, 3)} consecutive classes without missing.`,
           classesNeeded: Math.max(classesNeeded, 3)
         });
-      } else if (percentage < 75) {
+      } else if (percentage < ATTENDANCE_THRESHOLD * 100) {
         warnings.push({
           type: 'WARNING',
           subject: subject,
-          message: `Your attendance in ${subject} is ${percentage}%. You are ${classesNeeded} classes away from 75%.`,
+          message: `Your attendance in ${subject} is ${percentage}%. You are ${classesNeeded} classes away from ${ATTENDANCE_THRESHOLD * 100}%.`,
           severity: 'medium'
         });
         
         suggestions.push({
           subject: subject,
-          message: `Please attend the next ${classesNeeded} classes in ${subject} to reach 75% threshold.`,
+          message: `Please attend the next ${classesNeeded} classes in ${subject} to reach ${ATTENDANCE_THRESHOLD * 100}% threshold.`,
           classesNeeded: classesNeeded
         });
       }
