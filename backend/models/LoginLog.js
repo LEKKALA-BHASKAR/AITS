@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const LoginLogSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, refPath: 'userModel', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, refPath: 'userModel' },
   userModel: { type: String, enum: ['Student', 'Teacher', 'Admin'], required: true },
   email: { type: String, required: true },
   ipAddress: { type: String },

@@ -100,6 +100,11 @@ router.post('/', auth, roleCheck(['admin']), async (req, res) => {
     await notification.save();
     await notification.populate('createdBy', 'name email');
 
+    // Emit real-time notification event via Socket.IO
+    if (req.app.get('io')) {
+      req.app.get('io').emit('newNotification', notification);
+    }
+
     res.status(201).json({ 
       message: 'Notification created successfully', 
       notification 

@@ -11,7 +11,7 @@ const Notification = require('./models/Notification');
 
 async function seedDatabase() {
   try {
-    await mongoose.connect(process.env.MONGO_URL, {
+    await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URL, {
       dbName: process.env.DB_NAME || 'aits_csms'
     });
     console.log('Connected to MongoDB');
