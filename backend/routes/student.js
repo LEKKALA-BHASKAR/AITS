@@ -53,7 +53,58 @@ router.get('/results', auth, roleCheck(['student']), async (req, res) => {
 router.get('/achievements', auth, roleCheck(['student']), async (req, res) => {
   try {
     const student = await Student.findById(req.user.id).select('achievements certificates');
-    res.json({ achievements: student.achievements, certificates: student.certificates });
+    
+    // Also fetch from Achievement model
+    const Achievement = require('../models/Achievement');
+    const achievements = await Achievement.find({ student: req.user.id })
+      .populate('verifiedBy', 'name')
+      .sort({ createdAt: -1 });
+    
+    res.json({ 
+      achievements: achievements, 
+      certificates: student.certificates || [],
+      legacyAchievements: student.achievements || []
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Upload achievement certificate
+router.post('/achievements', auth, roleCheck(['student']), uploadLimiter, upload.single('certificate'), async (req, res) => {
+  try {
+    const { title, description, type, tags } = req.body;
+    
+    if (!title || !type) {
+      return res.status(400).json({ error: 'Title and type are required' });
+    }
+
+    let certificateUrl = null;
+    if (req.file) {
+      // Upload to Cloudinary
+      const result = await uploadToCloudinary(
+        req.file.buffer,
+        'achievements',
+        `achievement_${req.user.id}_${Date.now()}`
+      );
+      certificateUrl = result.secure_url;
+    }
+
+    const Achievement = require('../models/Achievement');
+    const achievement = await Achievement.create({
+      student: req.user.id,
+      title,
+      description,
+      type,
+      tags: tags ? JSON.parse(tags) : [],
+      certificateUrl,
+      status: 'pending'
+    });
+
+    res.status(201).json({
+      message: 'Achievement uploaded successfully. Pending approval.',
+      achievement
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

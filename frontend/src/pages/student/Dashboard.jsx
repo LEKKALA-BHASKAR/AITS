@@ -10,6 +10,7 @@ import Notifications from './Notifications';
 import SupportTickets from './SupportTickets';
 import Timetable from './Timetable';
 import Student360Profile from '../Student360Profile';
+import CommunityPage from '../CommunityPage';
 
 export default function StudentDashboard({ user, onLogout }) {
   const menuItems = [
@@ -20,6 +21,7 @@ export default function StudentDashboard({ user, onLogout }) {
     { name: 'Results', path: '/student/results', icon: 'FileText' },
     { name: 'Achievements', path: '/student/achievements', icon: 'Award' },
     { name: 'Remarks', path: '/student/remarks', icon: 'MessageSquare' },
+    { name: 'Community', path: '/student/community', icon: 'Users' },
     { name: 'Notifications', path: '/student/notifications', icon: 'Bell' },
     { name: 'Support', path: '/student/support', icon: 'MessageSquare' },
     { name: 'Timetable', path: '/student/timetable', icon: 'Calendar' },
@@ -35,6 +37,7 @@ export default function StudentDashboard({ user, onLogout }) {
         <Route path="results" element={<Results user={user} />} />
         <Route path="achievements" element={<Achievements user={user} />} />
         <Route path="remarks" element={<Remarks user={user} />} />
+        <Route path="community" element={<CommunityPage user={user} />} />
         <Route path="notifications" element={<Notifications user={user} />} />
         <Route path="support" element={<SupportTickets user={user} />} />
         <Route path="timetable" element={<Timetable user={user} />} />
