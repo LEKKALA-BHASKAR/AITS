@@ -4,7 +4,11 @@ import Overview from './Overview';
 import ManageStudents from './ManageStudents';
 import ManageTeachers from './ManageTeachers';
 import ManageDepartments from './ManageDepartments';
+import ManageSections from './ManageSections';
 import Approvals from './Approvals';
+import Analytics from './Analytics';
+import CreateNotification from './CreateNotification';
+import TimetableUpload from './TimetableUpload';
 
 export default function AdminDashboard({ user, onLogout }) {
   const menuItems = [
@@ -13,6 +17,10 @@ export default function AdminDashboard({ user, onLogout }) {
     { name: 'Students', path: '/admin/students', icon: 'GraduationCap' },
     { name: 'Teachers', path: '/admin/teachers', icon: 'Users' },
     { name: 'Departments', path: '/admin/departments', icon: 'Building' },
+    { name: 'Sections', path: '/admin/sections', icon: 'Users' },
+    { name: 'Analytics', path: '/admin/analytics', icon: 'BarChart' },
+    { name: 'Notifications', path: '/admin/notifications', icon: 'Bell' },
+    { name: 'Timetable', path: '/admin/timetable', icon: 'Calendar' },
   ];
 
   return (
@@ -23,6 +31,10 @@ export default function AdminDashboard({ user, onLogout }) {
         <Route path="students" element={<ManageStudents />} />
         <Route path="teachers" element={<ManageTeachers />} />
         <Route path="departments" element={<ManageDepartments />} />
+        <Route path="sections" element={<ManageSections />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="notifications" element={<CreateNotification />} />
+        <Route path="timetable" element={<TimetableUpload />} />
       </Routes>
     </Layout>
   );
