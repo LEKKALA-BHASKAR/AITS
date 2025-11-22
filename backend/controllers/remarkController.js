@@ -396,4 +396,15 @@ exports.getRemarksByCategory = async (req, res) => {
   }
 };
 
-module.exports = exports;
+module.exports = {
+  getStudentRemarks: exports.getStudentRemarks,
+  getStudentSummary: exports.getStudentSummary,
+  getStudentTimeline: exports.getStudentTimeline,
+  addRemark: exports.addRemark,
+  updateRemark: exports.updateRemark,
+  deleteRemark: exports.deleteRemark,
+  getFollowUpRemarks: exports.getFollowUpRemarks,
+  getUnresolvedIssues: exports.getUnresolvedIssues,
+  getRemarksByCategory: exports.getRemarksByCategory
+};
+

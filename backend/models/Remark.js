@@ -59,27 +59,13 @@ const RemarkSchema = new mongoose.Schema({
   severity: {
     type: String,
     enum: ['low', 'medium', 'high', 'critical'],
-    default: function() {
-      return this.type === 'negative' ? 'medium' : 'low';
-    }
+    default: 'medium'
   },
   
   // Impact on risk score (calculated)
   riskImpact: {
     type: Number,
-    default: function() {
-      if (this.type === 'positive') return -5; // Reduces risk
-      if (this.type === 'negative') {
-        switch(this.severity) {
-          case 'critical': return 20;
-          case 'high': return 15;
-          case 'medium': return 10;
-          case 'low': return 5;
-          default: return 0;
-        }
-      }
-      return 0; // Neutral has no impact
-    }
+    default: 0
   },
   
   // Action taken (if any)
@@ -121,9 +107,25 @@ RemarkSchema.index({ studentId: 1, category: 1 });
 RemarkSchema.index({ createdBy: 1, createdAt: -1 });
 RemarkSchema.index({ type: 1, severity: 1 });
 
-// Pre-save hook to update timestamp
+// Pre-save hook to update timestamp and calculate risk impact
 RemarkSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
+  
+  // Calculate risk impact based on type and severity
+  if (this.type === 'positive') {
+    this.riskImpact = -5; // Reduces risk
+  } else if (this.type === 'negative') {
+    switch(this.severity) {
+      case 'critical': this.riskImpact = 20; break;
+      case 'high': this.riskImpact = 15; break;
+      case 'medium': this.riskImpact = 10; break;
+      case 'low': this.riskImpact = 5; break;
+      default: this.riskImpact = 0;
+    }
+  } else {
+    this.riskImpact = 0; // Neutral has no impact
+  }
+  
   next();
 });
 

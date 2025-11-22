@@ -447,4 +447,9 @@ async function getRecentActivity(studentId) {
   }
 }
 
-module.exports = exports;
+module.exports = {
+  getStudent360Profile: exports.getStudent360Profile,
+  getBatchRiskAnalysis: exports.getBatchRiskAnalysis,
+  getSubjectPerformance: exports.getSubjectPerformance
+};
+
