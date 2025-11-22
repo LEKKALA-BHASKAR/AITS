@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
-import { Checkbox } from '../components/ui/checkbox';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { Progress } from '../../components/ui/progress';
+import { Checkbox } from '../../components/ui/checkbox';
 import { toast } from 'sonner';
 import {
   Clock,
@@ -121,13 +121,6 @@ export default function MarkAttendanceEnhanced() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleAttendance = (studentId) => {
-    setAttendance(prev => ({
-      ...prev,
-      [studentId]: prev[studentId] === 'present' ? 'absent' : 'present'
-    }));
   };
 
   const markAllPresent = () => {
