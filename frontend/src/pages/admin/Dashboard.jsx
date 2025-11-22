@@ -9,6 +9,8 @@ import Approvals from './Approvals';
 import Analytics from './Analytics';
 import CreateNotification from './CreateNotification';
 import TimetableUpload from './TimetableUpload';
+import Student360Profile from '../Student360Profile';
+import RemarksManagement from '../RemarksManagement';
 
 export default function AdminDashboard({ user, onLogout }) {
   const menuItems = [
@@ -29,6 +31,8 @@ export default function AdminDashboard({ user, onLogout }) {
         <Route index element={<Overview user={user} />} />
         <Route path="approvals" element={<Approvals />} />
         <Route path="students" element={<ManageStudents />} />
+        <Route path="students/:studentId/profile" element={<Student360Profile />} />
+        <Route path="students/:studentId/remarks" element={<RemarksManagement />} />
         <Route path="teachers" element={<ManageTeachers />} />
         <Route path="departments" element={<ManageDepartments />} />
         <Route path="sections" element={<ManageSections />} />

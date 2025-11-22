@@ -6,6 +6,8 @@ import Sections from './Sections';
 import Students from './Students';
 import MarkAttendance from './MarkAttendance';
 import Timetable from './Timetable';
+import Student360Profile from '../Student360Profile';
+import RemarksManagement from '../RemarksManagement';
 
 export default function TeacherDashboard({ user, onLogout }) {
   const menuItems = [
@@ -24,6 +26,8 @@ export default function TeacherDashboard({ user, onLogout }) {
         <Route path="profile" element={<Profile user={user} />} />
         <Route path="sections" element={<Sections user={user} />} />
         <Route path="students" element={<Students user={user} />} />
+        <Route path="students/:studentId/profile" element={<Student360Profile />} />
+        <Route path="students/:studentId/remarks" element={<RemarksManagement />} />
         <Route path="attendance" element={<MarkAttendance user={user} />} />
         <Route path="timetable" element={<Timetable user={user} />} />
       </Routes>
