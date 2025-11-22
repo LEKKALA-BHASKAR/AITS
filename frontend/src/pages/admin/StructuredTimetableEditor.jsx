@@ -269,10 +269,12 @@ export default function StructuredTimetableEditor() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={loadMockData} variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
-              Load Mock Data
-            </Button>
+            {process.env.NODE_ENV === 'development' && (
+              <Button onClick={loadMockData} variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Load Mock Data
+              </Button>
+            )}
             <Button onClick={handleSaveTimetable} disabled={loading || !timetable}>
               <Save className="w-4 h-4 mr-2" />
               Save Timetable

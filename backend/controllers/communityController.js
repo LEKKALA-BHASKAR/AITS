@@ -1,6 +1,7 @@
 const Community = require('../models/Community');
 const Student = require('../models/Student');
 const Teacher = require('../models/Teacher');
+const Admin = require('../models/Admin');
 
 module.exports = {
   // Create a new community
@@ -15,7 +16,7 @@ module.exports = {
       // Get creator info
       const userType = req.user.role === 'admin' ? 'Admin' : 'Teacher';
       const creator = req.user.role === 'admin' 
-        ? await require('../models/Admin').findById(req.user.id)
+        ? await Admin.findById(req.user.id)
         : await Teacher.findById(req.user.id);
 
       const community = await Community.create({
@@ -240,7 +241,7 @@ module.exports = {
         user = await Teacher.findById(req.user.id);
         userType = 'Teacher';
       } else {
-        user = await require('../models/Admin').findById(req.user.id);
+        user = await Admin.findById(req.user.id);
         userType = 'Admin';
       }
 
@@ -365,7 +366,7 @@ module.exports = {
         user = await Teacher.findById(req.user.id);
         userType = 'Teacher';
       } else {
-        user = await require('../models/Admin').findById(req.user.id);
+        user = await Admin.findById(req.user.id);
         userType = 'Admin';
       }
 
