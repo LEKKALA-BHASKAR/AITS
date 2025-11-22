@@ -15,7 +15,7 @@ export default function StudentDashboard({ user, onLogout }) {
   const menuItems = [
     { name: 'Dashboard', path: '/student', icon: 'LayoutDashboard' },
     { name: 'Profile', path: '/student/profile', icon: 'User' },
-    { name: '360° View', path: `/student/360-profile/${user.id}`, icon: 'Activity' },
+    { name: '360° View', path: `/student/360-profile/${user.id}`, icon: 'User' },
     { name: 'Attendance', path: '/student/attendance', icon: 'Calendar' },
     { name: 'Results', path: '/student/results', icon: 'FileText' },
     { name: 'Achievements', path: '/student/achievements', icon: 'Award' },
@@ -38,6 +38,7 @@ export default function StudentDashboard({ user, onLogout }) {
         <Route path="notifications" element={<Notifications user={user} />} />
         <Route path="support" element={<SupportTickets user={user} />} />
         <Route path="timetable" element={<Timetable user={user} />} />
+        <Route path="*" element={<div style={{padding:'2rem',textAlign:'center'}}><h2>Route not found</h2><p>The page you requested does not exist.</p></div>} />
       </Routes>
     </Layout>
   );
