@@ -9,7 +9,12 @@ const ThemeContext = createContext({
 export function ThemeProvider({ children, defaultTheme = 'light', storageKey = 'aits-theme' }) {
   const [theme, setTheme] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem(storageKey) || defaultTheme;
+      try {
+        return localStorage.getItem(storageKey) || defaultTheme;
+      } catch (error) {
+        console.warn('Failed to access localStorage:', error);
+        return defaultTheme;
+      }
     }
     return defaultTheme;
   });
@@ -18,7 +23,11 @@ export function ThemeProvider({ children, defaultTheme = 'light', storageKey = '
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    localStorage.setItem(storageKey, theme);
+    try {
+      localStorage.setItem(storageKey, theme);
+    } catch (error) {
+      console.warn('Failed to save theme to localStorage:', error);
+    }
   }, [theme, storageKey]);
 
   const toggleTheme = () => {
