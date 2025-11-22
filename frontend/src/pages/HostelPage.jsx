@@ -2,19 +2,33 @@ import React, { useState } from 'react';
 import ModuleList from '../components/ModuleList';
 
 const initialHostels = [
-  { name: 'A Block', location: 'North Campus', status: 'active' },
-  { name: 'B Block', location: 'South Campus', status: 'inactive' },
+  // ...existing code removed, will fetch from backend
 ];
 
 const HostelPage = () => {
-  const [hostels, setHostels] = useState(initialHostels);
+  const [hostels, setHostels] = useState([]);
   const [form, setForm] = useState({ name: '', location: '' });
+
+  // Fetch hostels from backend on mount
+  React.useEffect(() => {
+    fetch('http://localhost:8001/api/hostel')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setHostels(data.map(h => ({ name: h.name, location: h.location, status: h.status })));
+        }
+      });
+  }, []);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setHostels([...hostels, { ...form, status: 'active' }]);
+    await fetch('http://localhost:8001/api/hostel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, status: 'active' })
+    });
     setForm({ name: '', location: '' });
   };
 

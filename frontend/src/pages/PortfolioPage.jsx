@@ -2,19 +2,33 @@ import React, { useState } from 'react';
 import ModuleList from '../components/ModuleList';
 
 const initialPortfolio = [
-  { title: 'Personal Website', type: 'web', status: 'published' },
-  { title: 'Mobile App', type: 'app', status: 'draft' },
+  // ...existing code removed, will fetch from backend
 ];
 
 const PortfolioPage = () => {
-  const [portfolio, setPortfolio] = useState(initialPortfolio);
+  const [portfolio, setPortfolio] = useState([]);
   const [form, setForm] = useState({ title: '', type: '' });
+
+  // Fetch portfolio items from backend on mount
+  React.useEffect(() => {
+    fetch('http://localhost:8001/api/portfolio')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setPortfolio(data.map(p => ({ title: p.title, type: p.type, status: p.status })));
+        }
+      });
+  }, []);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setPortfolio([...portfolio, { ...form, status: 'draft' }]);
+    await fetch('http://localhost:8001/api/portfolio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, status: 'draft' })
+    });
     setForm({ title: '', type: '' });
   };
 

@@ -2,27 +2,33 @@ import React, { useState } from 'react';
 import ModuleList from '../components/ModuleList';
 
 const initialProjects = [
-	{
-		name: 'Smart Attendance System',
-		group: 'Group A',
-		status: 'in-progress',
-	},
-	{
-		name: 'Library Management App',
-		group: 'Group B',
-		status: 'completed',
-	},
+	// ...existing code removed, will fetch from backend
 ];
 
 const ProjectPage = () => {
-	const [projects, setProjects] = useState(initialProjects);
+	const [projects, setProjects] = useState([]);
 	const [form, setForm] = useState({ name: '', group: '' });
+
+	// Fetch projects from backend on mount
+	React.useEffect(() => {
+		fetch('http://localhost:8001/api/project')
+			.then(res => res.json())
+			.then(data => {
+				if (Array.isArray(data)) {
+					setProjects(data.map(p => ({ name: p.name, group: p.group, status: p.status })));
+				}
+			});
+	}, []);
 
 	const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
-		setProjects([...projects, { ...form, status: 'in-progress' }]);
+		await fetch('http://localhost:8001/api/project', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ ...form, status: 'in-progress' })
+		});
 		setForm({ name: '', group: '' });
 	};
 
