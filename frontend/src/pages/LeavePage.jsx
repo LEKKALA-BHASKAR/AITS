@@ -2,19 +2,33 @@ import React, { useState } from 'react';
 import ModuleList from '../components/ModuleList';
 
 const initialLeaves = [
-  { type: 'Sick', reason: 'Fever', status: 'pending' },
-  { type: 'Casual', reason: 'Family event', status: 'approved' },
+  // ...existing code removed, will fetch from backend
 ];
 
 const LeavePage = () => {
-  const [leaves, setLeaves] = useState(initialLeaves);
+  const [leaves, setLeaves] = useState([]);
   const [form, setForm] = useState({ type: '', reason: '' });
+
+  // Fetch leaves from backend on mount
+  React.useEffect(() => {
+    fetch('http://localhost:8001/api/leave')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setLeaves(data.map(l => ({ type: l.type, reason: l.reason, status: l.status })));
+        }
+      });
+  }, []);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setLeaves([...leaves, { ...form, status: 'pending' }]);
+    await fetch('http://localhost:8001/api/leave', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, status: 'pending' })
+    });
     setForm({ type: '', reason: '' });
   };
 

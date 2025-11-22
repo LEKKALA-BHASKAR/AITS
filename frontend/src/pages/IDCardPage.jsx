@@ -2,19 +2,33 @@ import React, { useState } from 'react';
 import ModuleList from '../components/ModuleList';
 
 const initialIDCards = [
-  { cardNumber: 'AITS2025001', status: 'active' },
-  { cardNumber: 'AITS2025002', status: 'inactive' },
+  // ...existing code removed, will fetch from backend
 ];
 
 const IDCardPage = () => {
-  const [idCards, setIDCards] = useState(initialIDCards);
+  const [idCards, setIDCards] = useState([]);
   const [form, setForm] = useState({ cardNumber: '' });
+
+  // Fetch ID cards from backend on mount
+  React.useEffect(() => {
+    fetch('http://localhost:8001/api/idcard')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setIDCards(data.map(i => ({ cardNumber: i.cardNumber, status: i.status })));
+        }
+      });
+  }, []);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setIDCards([...idCards, { ...form, status: 'active' }]);
+    await fetch('http://localhost:8001/api/idcard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, status: 'active' })
+    });
     setForm({ cardNumber: '' });
   };
 

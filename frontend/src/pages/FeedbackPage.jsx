@@ -2,19 +2,33 @@ import React, { useState } from 'react';
 import ModuleList from '../components/ModuleList';
 
 const initialFeedbacks = [
-  { message: 'Great teaching!', rating: 5 },
-  { message: 'Needs more examples.', rating: 3 },
+  // ...existing code removed, will fetch from backend
 ];
 
 const FeedbackPage = () => {
-  const [feedbacks, setFeedbacks] = useState(initialFeedbacks);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [form, setForm] = useState({ message: '', rating: '' });
+
+  // Fetch feedbacks from backend on mount
+  React.useEffect(() => {
+    fetch('http://localhost:8001/api/feedback')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setFeedbacks(data.map(f => ({ message: f.message, rating: f.rating })));
+        }
+      });
+  }, []);
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setFeedbacks([...feedbacks, { ...form }]);
+    await fetch('http://localhost:8001/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    });
     setForm({ message: '', rating: '' });
   };
 
