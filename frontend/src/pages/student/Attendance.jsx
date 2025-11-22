@@ -7,23 +7,56 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function Attendance({ user }) {
   const [attendance, setAttendance] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAttendance();
-  }, []);
+    if (user?._id) {
+      fetchAttendance();
+      fetchStats();
+    }
+  }, [user]);
 
   const fetchAttendance = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/student/attendance`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setAttendance(response.data);
+      // Try new API first, fallback to old one
+      try {
+        const response = await axios.get(`${API}/attendance/student/${user._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setAttendance(response.data);
+      } catch (err) {
+        // Fallback to old embedded attendance
+        const response = await axios.get(`${API}/student/attendance`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setAttendance(response.data);
+      }
     } catch (error) {
       toast.error('Failed to fetch attendance');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get(`${API}/attendance/student/${user._id}/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setStats(response.data);
+      } catch (err) {
+        // Fallback to old stats endpoint
+        const response = await axios.get(`${API}/student/attendance/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setStats({ overall: response.data, bySubject: [] });
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats');
     }
   };
 
@@ -46,31 +79,84 @@ export default function Attendance({ user }) {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900" data-testid="attendance-title">Attendance</h1>
 
+      {/* Overall Stats */}
+      {stats?.overall && (
+        <Card className={`border-2 ${stats.overall.lowAttendanceWarning ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'}`}>
+          <CardHeader>
+            <CardTitle>Overall Attendance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-5xl font-bold ${parseFloat(stats.overall.percentage) >= 75 ? 'text-green-600' : 'text-red-600'}`}>
+                  {stats.overall.percentage}%
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  {stats.overall.presentCount} / {stats.overall.totalClasses} classes attended
+                </p>
+              </div>
+              {stats.overall.lowAttendanceWarning && (
+                <div className="text-red-600 text-sm">
+                  ⚠️ Below 75% - Attendance required!
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Subject-wise Attendance */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {uniqueSubjects.map((subject, idx) => {
-          const stats = calculateSubjectAttendance(subject);
-          return (
+        {stats?.bySubject && stats.bySubject.length > 0 ? (
+          // Use stats from new API if available
+          stats.bySubject.map((subjectStat, idx) => (
             <Card key={idx} data-testid={`subject-card-${idx}`} className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="text-lg">{subject}</CardTitle>
+                <CardTitle className="text-lg">{subjectStat.subject}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-4xl font-bold mb-2 ${parseFloat(stats.percentage) >= 75 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                  {stats.percentage}%
+                <div className={`text-4xl font-bold mb-2 ${parseFloat(subjectStat.percentage) >= 75 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                  {subjectStat.percentage}%
                 </div>
                 <p className="text-sm text-gray-600">
-                  {stats.present} / {stats.total} classes attended
+                  {subjectStat.present} / {subjectStat.total} classes attended
                 </p>
                 <div className="mt-3 bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full ${parseFloat(stats.percentage) >= 75 ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`}
-                    style={{ width: `${stats.percentage}%` }}
+                    className={`h-2 rounded-full ${parseFloat(subjectStat.percentage) >= 75 ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`}
+                    style={{ width: `${subjectStat.percentage}%` }}
                   />
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
+          ))
+        ) : (
+          // Fallback to calculated subject stats
+          uniqueSubjects.map((subject, idx) => {
+            const stats = calculateSubjectAttendance(subject);
+            return (
+              <Card key={idx} data-testid={`subject-card-${idx}`} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg">{subject}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-4xl font-bold mb-2 ${parseFloat(stats.percentage) >= 75 ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+                    {stats.percentage}%
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {stats.present} / {stats.total} classes attended
+                  </p>
+                  <div className="mt-3 bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${parseFloat(stats.percentage) >= 75 ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`}
+                      style={{ width: `${stats.percentage}%` }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {attendance.length === 0 && (
@@ -81,6 +167,7 @@ export default function Attendance({ user }) {
         </Card>
       )}
 
+      {/* Attendance History */}
       <Card>
         <CardHeader>
           <CardTitle>Attendance History</CardTitle>
