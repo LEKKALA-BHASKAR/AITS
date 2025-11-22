@@ -20,21 +20,21 @@ export default function Attendance({ user }) {
   const fetchAttendance = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Try new API first, fallback to old one
+      const response = await axios.get(`${API}/attendance/student/${user._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAttendance(response.data);
+    } catch (error) {
+      // Fallback to old embedded attendance API
       try {
-        const response = await axios.get(`${API}/attendance/student/${user._id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setAttendance(response.data);
-      } catch (err) {
-        // Fallback to old embedded attendance
+        const token = localStorage.getItem('token');
         const response = await axios.get(`${API}/student/attendance`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setAttendance(response.data);
+      } catch (fallbackError) {
+        toast.error('Failed to fetch attendance');
       }
-    } catch (error) {
-      toast.error('Failed to fetch attendance');
     } finally {
       setLoading(false);
     }
@@ -43,20 +43,21 @@ export default function Attendance({ user }) {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/attendance/student/${user._id}/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStats(response.data);
+    } catch (error) {
+      // Fallback to old stats endpoint
       try {
-        const response = await axios.get(`${API}/attendance/student/${user._id}/stats`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setStats(response.data);
-      } catch (err) {
-        // Fallback to old stats endpoint
+        const token = localStorage.getItem('token');
         const response = await axios.get(`${API}/student/attendance/stats`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStats({ overall: response.data, bySubject: [] });
+      } catch (fallbackError) {
+        console.error('Failed to fetch stats');
       }
-    } catch (error) {
-      console.error('Failed to fetch stats');
     }
   };
 

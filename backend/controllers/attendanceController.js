@@ -32,7 +32,7 @@ module.exports = {
       const now = new Date();
       const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
       const currentDay = days[now.getDay()];
-      const currentSlot = timetable.getCurrentSlot(currentDay);
+      let currentSlot = timetable.getCurrentSlot(currentDay);
 
       if (!currentSlot) {
         // Check if we're within grace period of any slot
@@ -59,11 +59,13 @@ module.exports = {
         }
 
         // Use the slot within grace period
-        currentSlot.time = slotWithinGrace.time;
-        currentSlot.startTime = slotWithinGrace.startTime;
-        currentSlot.endTime = slotWithinGrace.endTime;
-        currentSlot.subject = slotWithinGrace.subject;
-        currentSlot.teacher = slotWithinGrace.teacher;
+        currentSlot = {
+          time: slotWithinGrace.time,
+          startTime: slotWithinGrace.startTime,
+          endTime: slotWithinGrace.endTime,
+          subject: slotWithinGrace.subject,
+          teacher: slotWithinGrace.teacher
+        };
       }
 
       // Verify teacher is assigned to this slot

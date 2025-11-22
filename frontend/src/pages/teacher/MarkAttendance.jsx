@@ -145,9 +145,12 @@ export default function MarkAttendance({ user }) {
       // Refresh current slot to update status
       await fetchCurrentSlot();
       
-      // Reset form
-      setAttendance({});
-      setStudents([]);
+      // Clear attendance selections but keep students loaded
+      const resetAttendance = {};
+      students.forEach(student => {
+        resetAttendance[student._id] = 'present';
+      });
+      setAttendance(resetAttendance);
     } catch (error) {
       const errorMsg = error.response?.data?.error || 'Failed to mark attendance';
       toast.error(errorMsg);

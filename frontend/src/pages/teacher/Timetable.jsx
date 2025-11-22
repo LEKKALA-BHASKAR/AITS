@@ -27,7 +27,8 @@ export default function TeacherTimetable({ user }) {
       setTodaySchedule(response.data);
     } catch (error) {
       if (error.response?.status !== 404) {
-        toast.error('Failed to fetch today\'s schedule');
+        const errorMsg = error.response?.data?.error || 'Failed to fetch today\'s schedule. Please try again later.';
+        toast.error(errorMsg);
       }
     } finally {
       setLoading(false);

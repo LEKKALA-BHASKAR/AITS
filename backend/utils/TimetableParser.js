@@ -158,11 +158,11 @@ class TimetableParser {
       throw new Error(`Time values must be between 1 and 12 in: ${time}`);
     }
 
-    // Convert to 24-hour format (assuming AM for single digits, PM for afternoon)
-    // 9-10 means 9:00 AM to 10:00 AM
-    // 1-2 means 1:00 PM to 2:00 PM (13:00 to 14:00)
-    const startHour = start < 9 ? start + 12 : start;
-    const endHour = end < 9 ? end + 12 : end;
+    // Convert to 24-hour format
+    // 9-12 are morning hours (AM): 9:00, 10:00, 11:00, 12:00
+    // 1-8 are afternoon hours (PM): 13:00, 14:00, 15:00, 16:00, 17:00, 18:00, 19:00, 20:00
+    const startHour = start <= 8 ? start + 12 : start;
+    const endHour = end <= 8 ? end + 12 : end;
 
     return [
       `${String(startHour).padStart(2, '0')}:00`,
