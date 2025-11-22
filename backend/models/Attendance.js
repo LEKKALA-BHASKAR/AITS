@@ -25,13 +25,31 @@ const AttendanceSchema = new mongoose.Schema({
   students: [StudentAttendanceSchema],
   markedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher' },
   isLocked: { type: Boolean, default: false }, // Lock after grace period
-  createdAt: { type: Date, default: Date.now }
+  lockedAt: { type: Date }, // When it was locked
+  
+  // HOD override tracking
+  lastModifiedBy: {
+    userId: mongoose.Schema.Types.ObjectId,
+    userType: { type: String, enum: ['admin', 'teacher'] },
+    userName: String
+  },
+  lastModifiedAt: { type: Date },
+  overrideReason: { type: String }, // Reason for HOD override
+  
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
 // Compound index to prevent duplicate attendance for same session
 AttendanceSchema.index({ section: 1, subject: 1, date: 1, time: 1 }, { unique: true });
 AttendanceSchema.index({ sectionId: 1, date: 1 });
 AttendanceSchema.index({ teacher: 1, date: 1 });
+
+// Pre-save hook to update timestamp
+AttendanceSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
 // Static method to check if attendance already exists
 AttendanceSchema.statics.existsForSession = async function(section, subject, date, time) {
