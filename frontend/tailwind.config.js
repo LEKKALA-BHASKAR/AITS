@@ -92,8 +92,8 @@ module.exports = {
   				'50%': { opacity: '1' }
   			},
   			shimmer: {
-  				'0%': { backgroundPosition: '-1000px 0' },
-  				'100%': { backgroundPosition: '1000px 0' }
+  				'0%': { backgroundPosition: '-100% 0' },
+  				'100%': { backgroundPosition: '100% 0' }
   			}
   		},
   		animation: {
@@ -104,7 +104,7 @@ module.exports = {
   			scaleIn: 'scaleIn 0.3s ease-out',
   			float: 'float 6s ease-in-out infinite',
   			glow: 'glow 2s ease-in-out infinite',
-  			shimmer: 'shimmer 3s linear infinite'
+  			shimmer: 'shimmer 2s linear infinite'
   		},
   		boxShadow: {
   			'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',

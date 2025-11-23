@@ -22,7 +22,6 @@ export default function PremiumIntroPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
-  const animationStartTime = useRef(Date.now());
   
   // Generate particle positions once
   const particles = useMemo(() => 
@@ -406,11 +405,9 @@ export default function PremiumIntroPage() {
                 {/* Card */}
                 <div className="relative backdrop-blur-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-3xl p-8 transition-all duration-500 group-hover:scale-105 group-hover:border-white/30 overflow-hidden">
                   {/* Shine Effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-shimmer"
-                    style={{
-                      background: 'linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)'
-                    }}
-                  />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  </div>
                   
                   {/* Icon */}
                   <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.gradient} mb-6 group-hover:scale-110 transition-transform duration-500`}>
