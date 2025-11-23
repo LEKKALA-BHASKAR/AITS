@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -22,6 +22,18 @@ export default function PremiumIntroPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef(null);
   const [isHovering, setIsHovering] = useState(false);
+  const animationStartTime = useRef(Date.now());
+  
+  // Generate particle positions once
+  const particles = useMemo(() => 
+    Array.from({ length: 30 }, () => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 3}s`,
+      duration: `${2 + Math.random() * 3}s`
+    })),
+    []
+  );
 
   useEffect(() => {
     setIsVisible(true);
@@ -123,15 +135,15 @@ export default function PremiumIntroPage() {
         />
 
         {/* Floating Particles */}
-        {[...Array(30)].map((_, i) => (
+        {particles.map((particle, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-white rounded-full opacity-30 animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`
+              left: particle.left,
+              top: particle.top,
+              animationDelay: particle.delay,
+              animationDuration: particle.duration
             }}
           />
         ))}
@@ -293,8 +305,7 @@ export default function PremiumIntroPage() {
                             className="flex-1 bg-gradient-to-t from-blue-500 to-purple-500 rounded-t-lg transition-all duration-500"
                             style={{ 
                               height: `${height}%`,
-                              opacity: isHovering ? 1 : 0.7,
-                              transform: isHovering ? `scaleY(${1 + Math.sin(Date.now() / 1000 + i) * 0.1})` : 'scaleY(1)'
+                              opacity: isHovering ? 1 : 0.7
                             }}
                           />
                         ))}
@@ -383,9 +394,10 @@ export default function PremiumIntroPage() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group relative"
+                className="group relative animate-fadeInUp"
                 style={{
-                  animation: `fadeInUp 0.8s ease-out ${index * 0.1}s both`
+                  animationDelay: `${index * 0.1}s`,
+                  animationFillMode: 'both'
                 }}
               >
                 {/* Card Glow */}
@@ -394,11 +406,9 @@ export default function PremiumIntroPage() {
                 {/* Card */}
                 <div className="relative backdrop-blur-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-3xl p-8 transition-all duration-500 group-hover:scale-105 group-hover:border-white/30 overflow-hidden">
                   {/* Shine Effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 animate-shimmer"
                     style={{
-                      background: 'linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                      transform: 'translateX(-100%)',
-                      animation: 'shine 1.5s ease-in-out infinite'
+                      background: 'linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)'
                     }}
                   />
                   
@@ -498,29 +508,6 @@ export default function PremiumIntroPage() {
           </p>
         </div>
       </footer>
-
-      {/* Custom Animations */}
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes shine {
-          0% {
-            transform: translateX(-100%) translateY(-100%) rotate(45deg);
-          }
-          100% {
-            transform: translateX(100%) translateY(100%) rotate(45deg);
-          }
-        }
-      `}</style>
     </div>
   );
 }

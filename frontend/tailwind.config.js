@@ -106,9 +106,6 @@ module.exports = {
   			glow: 'glow 2s ease-in-out infinite',
   			shimmer: 'shimmer 3s linear infinite'
   		},
-  		backdropBlur: {
-  			xs: '2px',
-  		},
   		boxShadow: {
   			'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
   			'glow-blue': '0 0 20px rgba(59, 130, 246, 0.5)',
