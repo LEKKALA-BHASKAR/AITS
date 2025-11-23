@@ -82,6 +82,18 @@ module.exports = {
   			scaleIn: {
   				from: { transform: 'scale(0.95)', opacity: '0' },
   				to: { transform: 'scale(1)', opacity: '1' }
+  			},
+  			float: {
+  				'0%, 100%': { transform: 'translateY(0px)' },
+  				'50%': { transform: 'translateY(-20px)' }
+  			},
+  			glow: {
+  				'0%, 100%': { opacity: '0.5' },
+  				'50%': { opacity: '1' }
+  			},
+  			shimmer: {
+  				'0%': { backgroundPosition: '-1000px 0' },
+  				'100%': { backgroundPosition: '1000px 0' }
   			}
   		},
   		animation: {
@@ -89,7 +101,18 @@ module.exports = {
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			fadeIn: 'fadeIn 0.5s ease-out',
   			slideIn: 'slideIn 0.3s ease-out',
-  			scaleIn: 'scaleIn 0.3s ease-out'
+  			scaleIn: 'scaleIn 0.3s ease-out',
+  			float: 'float 6s ease-in-out infinite',
+  			glow: 'glow 2s ease-in-out infinite',
+  			shimmer: 'shimmer 3s linear infinite'
+  		},
+  		backdropBlur: {
+  			xs: '2px',
+  		},
+  		boxShadow: {
+  			'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+  			'glow-blue': '0 0 20px rgba(59, 130, 246, 0.5)',
+  			'glow-purple': '0 0 20px rgba(139, 92, 246, 0.5)',
   		}
   	}
   },
