@@ -115,7 +115,7 @@ module.exports = {
   			'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
   			'glow-blue': '0 0 20px rgba(59, 130, 246, 0.5)',
   			'glow-purple': '0 0 20px rgba(139, 92, 246, 0.5)',
-  		}
+  		},
   	}
   },
   plugins: [require("tailwindcss-animate")],
