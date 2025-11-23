@@ -58,10 +58,19 @@ router.get('/students/search', auth, roleCheck(['admin']), async (req, res) => {
   }
 });
 
-// Get all students
+// Get all students with optional filters
 router.get('/students', auth, roleCheck(['admin']), async (req, res) => {
   try {
-    const students = await Student.find({ isActive: true })
+    const { name, departmentId, sectionId, atRisk, isApproved } = req.query;
+    const query = { isActive: true };
+
+    if (name) query.name = new RegExp(name, 'i');
+    if (departmentId && departmentId !== 'all') query.departmentId = departmentId;
+    if (sectionId && sectionId !== 'all') query.sectionId = sectionId;
+    if (atRisk !== undefined && atRisk !== 'all') query.atRisk = atRisk === 'true';
+    if (isApproved !== undefined && isApproved !== 'all') query.isApproved = isApproved === 'true';
+
+    const students = await Student.find(query)
       .populate('departmentId', 'name code')
       .populate('sectionId', 'name')
       .select('-password');
