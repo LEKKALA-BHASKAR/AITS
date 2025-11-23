@@ -24,6 +24,7 @@ export default function ManageCommunities() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addMembersDialogOpen, setAddMembersDialogOpen] = useState(false);
+  const [editingCommunity, setEditingCommunity] = useState(null);
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [rollNumbers, setRollNumbers] = useState('');
 
@@ -68,17 +69,40 @@ export default function ManageCommunities() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/community`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      
+      if (editingCommunity) {
+        // Update existing community
+        await axios.put(`${API}/community/${editingCommunity._id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Community updated successfully!');
+      } else {
+        // Create new community
+        await axios.post(`${API}/community`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Community created successfully!');
+      }
 
-      toast.success('Community created successfully!');
       setDialogOpen(false);
+      setEditingCommunity(null);
       setFormData({ name: '', description: '', type: 'private', department: '', section: '' });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to create community');
+      toast.error(error.response?.data?.error || `Failed to ${editingCommunity ? 'update' : 'create'} community`);
     }
+  };
+
+  const handleEditCommunity = (community) => {
+    setEditingCommunity(community);
+    setFormData({
+      name: community.name,
+      description: community.description || '',
+      type: community.type,
+      department: community.department?._id || '',
+      section: community.section?._id || ''
+    });
+    setDialogOpen(true);
   };
 
   const handleAddMembers = async () => {
@@ -147,7 +171,13 @@ export default function ManageCommunities() {
           Manage Communities
         </h1>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) {
+            setEditingCommunity(null);
+            setFormData({ name: '', description: '', type: 'private', department: '', section: '' });
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
@@ -156,7 +186,7 @@ export default function ManageCommunities() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Community</DialogTitle>
+              <DialogTitle>{editingCommunity ? 'Edit' : 'Create New'} Community</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateCommunity} className="space-y-4">
               <div>
@@ -234,10 +264,14 @@ export default function ManageCommunities() {
               )}
 
               <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => {
+                  setDialogOpen(false);
+                  setEditingCommunity(null);
+                  setFormData({ name: '', description: '', type: 'private', department: '', section: '' });
+                }}>
                   Cancel
                 </Button>
-                <Button type="submit">Create Community</Button>
+                <Button type="submit">{editingCommunity ? 'Update' : 'Create'} Community</Button>
               </div>
             </form>
           </DialogContent>
@@ -275,6 +309,14 @@ export default function ManageCommunities() {
                   <TableCell>{community.createdBy?.name}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditCommunity(community)}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
