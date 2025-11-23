@@ -37,20 +37,35 @@ export default function PremiumIntroPage() {
   useEffect(() => {
     setIsVisible(true);
 
+    let scrollTimeout;
+    let mouseTimeout;
+
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = setTimeout(() => {
+        setScrollY(window.scrollY);
+      }, 10); // Throttle to every 10ms
     };
 
     const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      if (mouseTimeout) {
+        clearTimeout(mouseTimeout);
+      }
+      mouseTimeout = setTimeout(() => {
+        setMousePosition({ x: e.clientX, y: e.clientY });
+      }, 50); // Throttle to every 50ms
     };
 
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('mousemove', handleMouseMove);
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      if (mouseTimeout) clearTimeout(mouseTimeout);
     };
   }, []);
 

@@ -75,6 +75,10 @@ module.exports = {
   				from: { opacity: '0', transform: 'translateY(10px)' },
   				to: { opacity: '1', transform: 'translateY(0)' }
   			},
+  			fadeInUp: {
+  				from: { opacity: '0', transform: 'translateY(30px)' },
+  				to: { opacity: '1', transform: 'translateY(0)' }
+  			},
   			slideIn: {
   				from: { transform: 'translateX(-100%)' },
   				to: { transform: 'translateX(0)' }
@@ -100,6 +104,7 @@ module.exports = {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			fadeIn: 'fadeIn 0.5s ease-out',
+  			fadeInUp: 'fadeInUp 0.8s ease-out',
   			slideIn: 'slideIn 0.3s ease-out',
   			scaleIn: 'scaleIn 0.3s ease-out',
   			float: 'float 6s ease-in-out infinite',
