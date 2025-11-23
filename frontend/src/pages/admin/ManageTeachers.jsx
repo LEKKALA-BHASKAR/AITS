@@ -4,6 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,8 +35,10 @@ export default function ManageTeachers() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [teacherToDelete, setTeacherToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -122,15 +134,22 @@ export default function ManageTeachers() {
   };
 
   const handleDelete = async (teacherId) => {
-    if (!window.confirm('Are you sure you want to delete this teacher?')) return;
+    setTeacherToDelete(teacherId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!teacherToDelete) return;
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API}/admin/teachers/${teacherId}`, {
+      await axios.delete(`${API}/admin/teachers/${teacherToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       toast.success('Teacher deleted successfully!');
+      setIsDeleteDialogOpen(false);
+      setTeacherToDelete(null);
       fetchTeachers();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to delete teacher');
@@ -433,6 +452,22 @@ export default function ManageTeachers() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete the teacher. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTeacherToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

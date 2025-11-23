@@ -3,6 +3,16 @@ import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,7 +29,9 @@ export default function ManageSections() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingSection, setEditingSection] = useState(null);
+  const [sectionToDelete, setSectionToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     departmentId: '',
@@ -86,15 +98,22 @@ export default function ManageSections() {
   };
 
   const handleDelete = async (sectionId) => {
-    if (!window.confirm('Are you sure you want to delete this section?')) return;
+    setSectionToDelete(sectionId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!sectionToDelete) return;
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/section/${sectionId}`, {
+      await axios.delete(`${API_URL}/section/${sectionToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       toast.success('Section deleted successfully!');
+      setIsDeleteDialogOpen(false);
+      setSectionToDelete(null);
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to delete section');
@@ -275,6 +294,22 @@ export default function ManageSections() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete the section. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSectionToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

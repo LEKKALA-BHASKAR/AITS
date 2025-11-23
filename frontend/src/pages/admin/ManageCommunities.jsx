@@ -3,6 +3,16 @@ import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,8 +34,10 @@ export default function ManageCommunities() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addMembersDialogOpen, setAddMembersDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingCommunity, setEditingCommunity] = useState(null);
   const [selectedCommunity, setSelectedCommunity] = useState(null);
+  const [communityToDelete, setCommunityToDelete] = useState(null);
   const [rollNumbers, setRollNumbers] = useState('');
 
   const [formData, setFormData] = useState({
@@ -131,17 +143,22 @@ export default function ManageCommunities() {
   };
 
   const handleDeleteCommunity = async (communityId) => {
-    if (!window.confirm('Are you sure you want to delete this community?')) {
-      return;
-    }
+    setCommunityToDelete(communityId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!communityToDelete) return;
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API}/community/${communityId}`, {
+      await axios.delete(`${API}/community/${communityToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       toast.success('Community deleted successfully!');
+      setIsDeleteDialogOpen(false);
+      setCommunityToDelete(null);
       fetchData();
     } catch (error) {
       toast.error('Failed to delete community');
@@ -389,6 +406,22 @@ export default function ManageCommunities() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete the community. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCommunityToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
