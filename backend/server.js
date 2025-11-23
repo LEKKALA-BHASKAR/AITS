@@ -87,6 +87,8 @@ const behaviorRoutes = require('./routes/behavior');
 const teacherNoteRoutes = require('./routes/teacherNote');
 const activityRoutes = require('./routes/activity');
 const timelineRoutes = require('./routes/timeline');
+const weeklyReportRoutes = require('./routes/weeklyReport');
+const counselingRoutes = require('./routes/counseling');
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -135,6 +137,8 @@ app.use('/api/behavior', behaviorRoutes);
 app.use('/api/teacher-notes', teacherNoteRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/timeline', timelineRoutes);
+app.use('/api/weekly-reports', weeklyReportRoutes);
+app.use('/api/counseling', counselingRoutes);
 
 app.get('/api', (req, res) => {
   res.json({ message: 'AITS CSMS API Server Running' });
