@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+const API_URL = process.env.REACT_APP_BACKEND_URL ? `${process.env.REACT_APP_BACKEND_URL}/api` : 'http://localhost:8001/api';
 
 export default function ManageSections() {
   const [sections, setSections] = useState([]);
@@ -23,7 +23,7 @@ export default function ManageSections() {
   const [formData, setFormData] = useState({
     name: '',
     departmentId: '',
-    classTeacherId: ''
+    teacherId: ''
   });
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function ManageSections() {
     setFormData({
       name: section.name,
       departmentId: section.departmentId?._id || '',
-      classTeacherId: section.classTeacherId?._id || ''
+      teacherId: section.teacherId?._id || ''
     });
     setIsDialogOpen(true);
   };
@@ -103,7 +103,7 @@ export default function ManageSections() {
 
   const resetForm = () => {
     setEditingSection(null);
-    setFormData({ name: '', departmentId: '', classTeacherId: '' });
+    setFormData({ name: '', departmentId: '', teacherId: '' });
   };
 
   if (loading) {
@@ -179,8 +179,8 @@ export default function ManageSections() {
               <div className="space-y-2">
                 <Label htmlFor="classTeacher">Class Teacher</Label>
                 <Select
-                  value={formData.classTeacherId}
-                  onValueChange={(value) => setFormData({ ...formData, classTeacherId: value })}
+                  value={formData.teacherId}
+                  onValueChange={(value) => setFormData({ ...formData, teacherId: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Class Teacher (Optional)" />
@@ -241,7 +241,7 @@ export default function ManageSections() {
                   <p className="text-sm">
                     <span className="text-muted-foreground">Class Teacher: </span>
                     <span className="font-semibold">
-                      {section.classTeacherId?.name || 'Not Assigned'}
+                      {section.teacherId?.name || 'Not Assigned'}
                     </span>
                   </p>
                 </div>

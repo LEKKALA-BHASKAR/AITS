@@ -10,7 +10,7 @@ import { Building, Plus, Edit, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+const API_URL = process.env.REACT_APP_BACKEND_URL ? `${process.env.REACT_APP_BACKEND_URL}/api` : 'http://localhost:8001/api';
 
 export default function ManageDepartments() {
   const [departments, setDepartments] = useState([]);

@@ -65,6 +65,8 @@ export default function ManageStudents() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isAttendanceDialogOpen, setIsAttendanceDialogOpen] = useState(false);
+  const [isMarksDialogOpen, setIsMarksDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [sections, setSections] = useState([]);
@@ -83,6 +85,20 @@ export default function ManageStudents() {
     sectionId: '',
     phone: '',
     address: ''
+  });
+
+  const [attendanceFormData, setAttendanceFormData] = useState({
+    subject: '',
+    date: new Date().toISOString().split('T')[0],
+    status: 'present'
+  });
+
+  const [marksFormData, setMarksFormData] = useState({
+    subject: '',
+    marks: '',
+    grade: '',
+    examType: 'midterm',
+    semester: ''
   });
 
   useEffect(() => {
@@ -109,7 +125,7 @@ export default function ManageStudents() {
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${API}/departments`, {
+      const res = await axios.get(`${API}/department`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDepartments(res.data);
@@ -121,7 +137,7 @@ export default function ManageStudents() {
   const fetchSections = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`${API}/sections`, {
+      const res = await axios.get(`${API}/section`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSections(res.data);
@@ -206,48 +222,70 @@ export default function ManageStudents() {
   };
 
   // Attendance and results
-  const addAttendance = async (student) => {
-    const subject = prompt('Enter subject:');
-    const status = prompt('Enter status (present/absent/late):');
-    if (!subject || !status) return;
+  const openAttendanceDialog = (student) => {
+    setSelectedStudent(student);
+    setAttendanceFormData({
+      subject: '',
+      date: new Date().toISOString().split('T')[0],
+      status: 'present'
+    });
+    setIsAttendanceDialogOpen(true);
+  };
+
+  const addAttendance = async () => {
+    if (!attendanceFormData.subject) {
+      toast.error('Please enter subject');
+      return;
+    }
 
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${API}/admin/students/${student._id}/attendance`,
-        { subject, date: new Date().toISOString().split('T')[0], status },
+        `${API}/admin/students/${selectedStudent._id}/attendance`,
+        attendanceFormData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success('Attendance added successfully');
+      setIsAttendanceDialogOpen(false);
       fetchStudents();
     } catch (error) {
       toast.error('Failed to add attendance');
     }
   };
 
-  const addResult = async (student) => {
-    const subject = prompt('Enter subject:');
-    const marks = prompt('Enter marks:');
-    const grade = prompt('Enter grade:');
-    const examType = prompt('Enter exam type (midterm/final):');
-    const semester = prompt('Enter semester:');
-    
-    if (!subject || !marks) return;
+  const openMarksDialog = (student) => {
+    setSelectedStudent(student);
+    setMarksFormData({
+      subject: '',
+      marks: '',
+      grade: '',
+      examType: 'midterm',
+      semester: ''
+    });
+    setIsMarksDialogOpen(true);
+  };
+
+  const addResult = async () => {
+    if (!marksFormData.subject || !marksFormData.marks) {
+      toast.error('Please enter subject and marks');
+      return;
+    }
 
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `${API}/admin/students/${student._id}/results`,
+        `${API}/admin/students/${selectedStudent._id}/results`,
         { 
-          subject, 
-          marks: parseInt(marks), 
-          grade, 
-          examType, 
-          semester: parseInt(semester) 
+          subject: marksFormData.subject, 
+          marks: parseInt(marksFormData.marks), 
+          grade: marksFormData.grade, 
+          examType: marksFormData.examType, 
+          semester: parseInt(marksFormData.semester) 
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success('Result added successfully');
+      setIsMarksDialogOpen(false);
       fetchStudents();
     } catch (error) {
       toast.error('Failed to add result');
@@ -495,11 +533,11 @@ export default function ManageStudents() {
                                 )}
                                 {student.isApproved ? 'Unapprove' : 'Approve'}
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => addAttendance(student)}>
+                              <DropdownMenuItem onClick={() => openAttendanceDialog(student)}>
                                 <Calendar className="h-4 w-4 mr-2" />
                                 Add Attendance
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => addResult(student)}>
+                              <DropdownMenuItem onClick={() => openMarksDialog(student)}>
                                 <Award className="h-4 w-4 mr-2" />
                                 Add Result
                               </DropdownMenuItem>
@@ -726,6 +764,136 @@ export default function ManageStudents() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Attendance Dialog */}
+      <Dialog open={isAttendanceDialogOpen} onOpenChange={setIsAttendanceDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Attendance for {selectedStudent?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                value={attendanceFormData.subject}
+                onChange={(e) => setAttendanceFormData({ ...attendanceFormData, subject: e.target.value })}
+                placeholder="Enter subject name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={attendanceFormData.date}
+                onChange={(e) => setAttendanceFormData({ ...attendanceFormData, date: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={attendanceFormData.status}
+                onValueChange={(value) => setAttendanceFormData({ ...attendanceFormData, status: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="present">Present</SelectItem>
+                  <SelectItem value="absent">Absent</SelectItem>
+                  <SelectItem value="late">Late</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAttendanceDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={addAttendance}>Add Attendance</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Marks Dialog */}
+      <Dialog open={isMarksDialogOpen} onOpenChange={setIsMarksDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Result for {selectedStudent?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="result-subject">Subject</Label>
+              <Input
+                id="result-subject"
+                value={marksFormData.subject}
+                onChange={(e) => setMarksFormData({ ...marksFormData, subject: e.target.value })}
+                placeholder="Enter subject name"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="marks">Marks</Label>
+                <Input
+                  id="marks"
+                  type="number"
+                  value={marksFormData.marks}
+                  onChange={(e) => setMarksFormData({ ...marksFormData, marks: e.target.value })}
+                  placeholder="Enter marks"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="grade">Grade</Label>
+                <Input
+                  id="grade"
+                  value={marksFormData.grade}
+                  onChange={(e) => setMarksFormData({ ...marksFormData, grade: e.target.value })}
+                  placeholder="A, B, C, etc."
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="examType">Exam Type</Label>
+                <Select
+                  value={marksFormData.examType}
+                  onValueChange={(value) => setMarksFormData({ ...marksFormData, examType: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select exam type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="midterm">Midterm</SelectItem>
+                    <SelectItem value="final">Final</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="semester">Semester</Label>
+                <Input
+                  id="semester"
+                  type="number"
+                  value={marksFormData.semester}
+                  onChange={(e) => setMarksFormData({ ...marksFormData, semester: e.target.value })}
+                  placeholder="1, 2, 3..."
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMarksDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={addResult}>Add Result</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
