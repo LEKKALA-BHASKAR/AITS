@@ -23,10 +23,10 @@ const MonitoringScoreCard = ({ score, studentName, rollNumber, trend }) => {
   };
 
   const getRiskLevel = (score) => {
-    if (score >= 75) return { label: 'Low Risk', color: 'green' };
-    if (score >= 60) return { label: 'Medium Risk', color: 'yellow' };
-    if (score >= 40) return { label: 'High Risk', color: 'orange' };
-    return { label: 'Critical Risk', color: 'red' };
+    if (score >= 75) return { label: 'Low Risk', color: 'outline' };
+    if (score >= 60) return { label: 'Medium Risk', color: 'secondary' };
+    if (score >= 40) return { label: 'High Risk', color: 'destructive' };
+    return { label: 'Critical Risk', color: 'destructive' };
   };
 
   const risk = getRiskLevel(score);

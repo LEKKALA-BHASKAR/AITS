@@ -142,11 +142,13 @@ const generateWeeklyReport = async (req, res) => {
     const neutralRemarks = remarks.filter(r => r.type === 'neutral').length;
     
     // Create report
+    const weekNumber = Math.ceil((new Date(startDate).getTime() - new Date(new Date(startDate).getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000));
+    
     const report = await WeeklyReport.create({
       studentId,
       weekStartDate: startDate,
       weekEndDate: endDate,
-      weekNumber: Math.ceil((endDate - startDate) / (7 * 24 * 60 * 60 * 1000)),
+      weekNumber,
       summary: {
         overallScore: monitoringScore?.overallScore || 0,
         riskLevel: monitoringScore?.riskLevel || 'medium',

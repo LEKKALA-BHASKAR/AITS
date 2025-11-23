@@ -43,7 +43,7 @@ const calculateMonitoringScore = async (req, res) => {
     const results = await Result.find({ studentId }).sort({ createdAt: -1 }).limit(10);
     if (results.length > 0) {
       const avgMarks = results.reduce((sum, r) => sum + (r.marks || 0), 0) / results.length;
-      monitoringScore.components.academicScore = Math.min(100, (avgMarks / 100) * 100);
+      monitoringScore.components.academicScore = Math.min(100, avgMarks);
     }
     
     // Calculate behavior score

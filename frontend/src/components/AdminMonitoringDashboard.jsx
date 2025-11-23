@@ -20,6 +20,16 @@ const AdminMonitoringDashboard = () => {
   const [decliningStudents, setDecliningStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const getRiskLevelVariant = (riskLevel) => {
+    const variants = {
+      critical: 'destructive',
+      high: 'destructive',
+      medium: 'secondary',
+      low: 'outline'
+    };
+    return variants[riskLevel] || 'secondary';
+  };
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -67,7 +77,7 @@ const AdminMonitoringDashboard = () => {
                 <Target className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{student.overallScore}/100</span>
               </div>
-              <Badge variant={student.riskLevel}>{student.riskLevel}</Badge>
+              <Badge variant={getRiskLevelVariant(student.riskLevel)}>{student.riskLevel}</Badge>
               {showTrend && student.trend && (
                 <div className="flex items-center gap-1 text-sm">
                   {student.trend.direction === 'up' ? (

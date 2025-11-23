@@ -120,6 +120,16 @@ const TeacherCollaborationNotes = ({ studentId }) => {
     return colors[priority] || 'secondary';
   };
 
+  const getRiskLevelVariant = (riskLevel) => {
+    const variants = {
+      critical: 'destructive',
+      high: 'destructive',
+      medium: 'secondary',
+      low: 'outline'
+    };
+    return variants[riskLevel] || 'secondary';
+  };
+
   const getCategoryLabel = (category) => {
     return category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
