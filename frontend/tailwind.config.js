@@ -75,6 +75,10 @@ module.exports = {
   				from: { opacity: '0', transform: 'translateY(10px)' },
   				to: { opacity: '1', transform: 'translateY(0)' }
   			},
+  			fadeInUp: {
+  				from: { opacity: '0', transform: 'translateY(30px)' },
+  				to: { opacity: '1', transform: 'translateY(0)' }
+  			},
   			slideIn: {
   				from: { transform: 'translateX(-100%)' },
   				to: { transform: 'translateX(0)' }
@@ -82,15 +86,36 @@ module.exports = {
   			scaleIn: {
   				from: { transform: 'scale(0.95)', opacity: '0' },
   				to: { transform: 'scale(1)', opacity: '1' }
+  			},
+  			float: {
+  				'0%, 100%': { transform: 'translateY(0px)' },
+  				'50%': { transform: 'translateY(-20px)' }
+  			},
+  			glow: {
+  				'0%, 100%': { opacity: '0.5' },
+  				'50%': { opacity: '1' }
+  			},
+  			shimmer: {
+  				'0%': { backgroundPosition: '-100% 0' },
+  				'100%': { backgroundPosition: '100% 0' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			fadeIn: 'fadeIn 0.5s ease-out',
+  			fadeInUp: 'fadeInUp 0.8s ease-out',
   			slideIn: 'slideIn 0.3s ease-out',
-  			scaleIn: 'scaleIn 0.3s ease-out'
-  		}
+  			scaleIn: 'scaleIn 0.3s ease-out',
+  			float: 'float 6s ease-in-out infinite',
+  			glow: 'glow 2s ease-in-out infinite',
+  			shimmer: 'shimmer 2s linear infinite'
+  		},
+  		boxShadow: {
+  			'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+  			'glow-blue': '0 0 20px rgba(59, 130, 246, 0.5)',
+  			'glow-purple': '0 0 20px rgba(139, 92, 246, 0.5)',
+  		},
   	}
   },
   plugins: [require("tailwindcss-animate")],

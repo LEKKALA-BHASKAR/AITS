@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import './App.css';
-import LandingPage from './pages/LandingPage';
+import PremiumIntroPage from './pages/PremiumIntroPage';
 import Login from './pages/Login';
 import StudentDashboard from './pages/student/Dashboard';
 import TeacherDashboard from './pages/teacher/Dashboard';
@@ -46,7 +46,7 @@ function App() {
         <Toaster position="top-right" richColors />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={!user ? <LandingPage /> : <Navigate to={`/${user.role}`} />} />
+            <Route path="/" element={!user ? <PremiumIntroPage /> : <Navigate to={`/${user.role}`} />} />
             <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to={`/${user.role}`} />} />
             <Route path="/student/*" element={user?.role === 'student' ? <StudentDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
             <Route path="/teacher/*" element={user?.role === 'teacher' ? <TeacherDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />

@@ -4,17 +4,34 @@
 
 body {
     margin: 0;
-    font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
         "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    text-rendering: optimizeLegibility;
 }
 
 code {
     font-family:
         source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* Custom animations for premium intro page */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.8s ease-out;
 }
 
 @layer base {
