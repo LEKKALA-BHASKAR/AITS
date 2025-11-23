@@ -3,6 +3,16 @@ import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,7 +34,10 @@ export default function ManageCommunities() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addMembersDialogOpen, setAddMembersDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingCommunity, setEditingCommunity] = useState(null);
   const [selectedCommunity, setSelectedCommunity] = useState(null);
+  const [communityToDelete, setCommunityToDelete] = useState(null);
   const [rollNumbers, setRollNumbers] = useState('');
 
   const [formData, setFormData] = useState({
@@ -68,17 +81,40 @@ export default function ManageCommunities() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/community`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      
+      if (editingCommunity) {
+        // Update existing community
+        await axios.put(`${API}/community/${editingCommunity._id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Community updated successfully!');
+      } else {
+        // Create new community
+        await axios.post(`${API}/community`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        toast.success('Community created successfully!');
+      }
 
-      toast.success('Community created successfully!');
       setDialogOpen(false);
+      setEditingCommunity(null);
       setFormData({ name: '', description: '', type: 'private', department: '', section: '' });
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to create community');
+      toast.error(error.response?.data?.error || `Failed to ${editingCommunity ? 'update' : 'create'} community`);
     }
+  };
+
+  const handleEditCommunity = (community) => {
+    setEditingCommunity(community);
+    setFormData({
+      name: community.name,
+      description: community.description || '',
+      type: community.type,
+      department: community.department?._id || '',
+      section: community.section?._id || ''
+    });
+    setDialogOpen(true);
   };
 
   const handleAddMembers = async () => {
@@ -107,17 +143,22 @@ export default function ManageCommunities() {
   };
 
   const handleDeleteCommunity = async (communityId) => {
-    if (!window.confirm('Are you sure you want to delete this community?')) {
-      return;
-    }
+    setCommunityToDelete(communityId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!communityToDelete) return;
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API}/community/${communityId}`, {
+      await axios.delete(`${API}/community/${communityToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       toast.success('Community deleted successfully!');
+      setIsDeleteDialogOpen(false);
+      setCommunityToDelete(null);
       fetchData();
     } catch (error) {
       toast.error('Failed to delete community');
@@ -147,7 +188,13 @@ export default function ManageCommunities() {
           Manage Communities
         </h1>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) {
+            setEditingCommunity(null);
+            setFormData({ name: '', description: '', type: 'private', department: '', section: '' });
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
@@ -156,7 +203,7 @@ export default function ManageCommunities() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Community</DialogTitle>
+              <DialogTitle>{editingCommunity ? 'Edit' : 'Create New'} Community</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateCommunity} className="space-y-4">
               <div>
@@ -234,10 +281,14 @@ export default function ManageCommunities() {
               )}
 
               <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => {
+                  setDialogOpen(false);
+                  setEditingCommunity(null);
+                  setFormData({ name: '', description: '', type: 'private', department: '', section: '' });
+                }}>
                   Cancel
                 </Button>
-                <Button type="submit">Create Community</Button>
+                <Button type="submit">{editingCommunity ? 'Update' : 'Create'} Community</Button>
               </div>
             </form>
           </DialogContent>
@@ -275,6 +326,14 @@ export default function ManageCommunities() {
                   <TableCell>{community.createdBy?.name}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditCommunity(community)}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
@@ -347,6 +406,22 @@ export default function ManageCommunities() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete the community. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCommunityToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

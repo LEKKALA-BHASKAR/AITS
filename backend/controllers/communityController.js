@@ -19,7 +19,7 @@ module.exports = {
         ? await Admin.findById(req.user.id)
         : await Teacher.findById(req.user.id);
 
-      const community = await Community.create({
+      const community = new Community({
         name,
         description,
         type: type || 'private',
@@ -34,7 +34,7 @@ module.exports = {
         posts: []
       });
 
-      // Add creator as admin member
+      // Add creator as admin member before saving
       community.addMember(req.user.id, userType, creator.name, 'admin');
       await community.save();
 

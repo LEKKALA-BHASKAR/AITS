@@ -3,6 +3,16 @@ import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,14 +20,16 @@ import { Building, Plus, Edit, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+const API_URL = process.env.REACT_APP_BACKEND_URL ? `${process.env.REACT_APP_BACKEND_URL}/api` : 'http://localhost:8001/api';
 
 export default function ManageDepartments() {
   const [departments, setDepartments] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingDept, setEditingDept] = useState(null);
+  const [deptToDelete, setDeptToDelete] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -90,15 +102,22 @@ export default function ManageDepartments() {
   };
 
   const handleDelete = async (deptId) => {
-    if (!window.confirm('Are you sure you want to delete this department?')) return;
+    setDeptToDelete(deptId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deptToDelete) return;
     
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API_URL}/department/${deptId}`, {
+      await axios.delete(`${API_URL}/department/${deptToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
       toast.success('Department deleted successfully!');
+      setIsDeleteDialogOpen(false);
+      setDeptToDelete(null);
       fetchDepartments();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to delete department');
@@ -255,6 +274,22 @@ export default function ManageDepartments() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete the department. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeptToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
